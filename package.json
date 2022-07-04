@@ -1,0 +1,37 @@
+{
+  "name": "appointments",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "add-migration": "npx sequelize-cli migration:generate --name",
+    "add-seeders": "npx sequelize-cli db:seed:all",
+    "undo-seeders": "npx sequelize-cli db:seed:undo:all",
+    "docker:down": "docker compose down",
+    "docker:up": "docker compose up -d"
+  },
+  "author": "Tomas <szemzotomas@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "helmet": "^5.1.0",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.21.1",
+    "winston": "^3.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^1.3.3",
+    "sequelize-cli": "^6.4.1"
+  }
+}
