@@ -1,3 +1,5 @@
+const OFF = 0;
+
 module.exports = {
   env: {
     browser: true,
@@ -11,5 +13,7 @@ module.exports = {
     ecmaVersion: 'latest',
   },
   rules: {
+    'import/no-dynamic-require': OFF,
+    'no-use-before-define': OFF,
   },
 };

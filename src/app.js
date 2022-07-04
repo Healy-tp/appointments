@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
 
-// const userRoutes = require("./routes/user");
+const routes = require('./routes/api');
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-// app.use("/api/user", userRoutes);
+app.use('/api', routes);
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
