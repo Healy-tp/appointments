@@ -37,10 +37,9 @@ Appointment.init({
   status: DataTypes.STRING,
 }, {
   sequelize,
-  tableName: 'users',
+  tableName: 'appointments',
   timestamps: true,
-  modelName: 'Doctor',
-  paranoid: true,
+  modelName: 'Appointment',
   hooks: {},
 });
 

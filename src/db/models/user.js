@@ -30,7 +30,6 @@ User.init({
   tableName: 'users',
   timestamps: true,
   modelName: 'User',
-  paranoid: true,
   hooks: {},
 });
 

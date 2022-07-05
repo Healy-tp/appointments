@@ -26,7 +26,6 @@ Office.init({
   tableName: 'offices',
   timestamps: true,
   modelName: 'Office',
-  paranoid: true,
   hooks: {},
 });
 

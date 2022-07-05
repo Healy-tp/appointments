@@ -31,7 +31,6 @@ Doctor.init({
   tableName: 'doctors',
   timestamps: true,
   modelName: 'Doctor',
-  paranoid: true,
   hooks: {},
 });
 
