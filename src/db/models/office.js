@@ -8,7 +8,10 @@ class Office extends Model {
    * The `models/index` file will call this method automatically.
    */
   static associate(models) {
-    this.hasMany(models.Appointments, {
+    this.hasMany(models.Appointment, {
+      foreignKey: 'officeId',
+    });
+    this.hasMany(models.Availability, {
       foreignKey: 'officeId',
     });
   }
