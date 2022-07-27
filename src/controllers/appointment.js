@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const { Appointment } = require('../db/models/appointment');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
@@ -59,7 +59,14 @@ async function createAppointment({
   });
 }
 
-function updateAppointment(id, updates) {
+function updateAppointment(id, isDoctor, updates) {
   const filters = { where: { id } };
+
+  if (isDoctor) {
+    updates.status = APPOINTMENT_STATUS.TO_CONFIRM;
+  } else {
+    updates.timesModifiedByUser = literal('"timesModifiedByUser" + 1');
+  }
+
   return Appointment.update(updates, filters);
 }

@@ -33,8 +33,10 @@ module.exports = {
       weekday: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        min: WEEKDAYS.MONDAY,
-        max: WEEKDAYS.SATURDAY,
+        validate: {
+          min: WEEKDAYS.MONDAY,
+          max: WEEKDAYS.SATURDAY,
+        },
       },
       startHour: {
         type: Sequelize.TIME,

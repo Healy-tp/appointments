@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const { MAX_APPOINTMENT_UPDATES } = require('../../utils/constants');
 const { sequelize } = require('../dbsetup');
 
 class Appointment extends Model {
@@ -35,9 +36,17 @@ Appointment.init({
   officeId: DataTypes.INTEGER,
   arrivalTime: DataTypes.DATE,
   status: DataTypes.STRING,
+  timesModifiedByUser: {
+    type: DataTypes.INTEGER,
+    validate: {
+      max: MAX_APPOINTMENT_UPDATES,
+    },
+    defaultValue: 0,
+  },
 }, {
   sequelize,
   tableName: 'appointments',
+  paranoid: true,
   timestamps: true,
   modelName: 'Appointment',
   hooks: {},

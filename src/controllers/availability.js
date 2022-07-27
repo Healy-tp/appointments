@@ -6,6 +6,7 @@ const { Availability } = require('../db/models/availability');
 
 const self = {
   createAvailability,
+  getByDoctorId,
 };
 
 module.exports = self;
@@ -53,4 +54,14 @@ async function createAvailability({
     frequency,
     validUntil,
   });
+}
+
+async function getByDoctorId(doctorId) {
+  const filters = {
+    where: {
+      doctorId,
+    },
+    raw: true,
+  };
+  return Availability.findAll(filters);
 }

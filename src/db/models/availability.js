@@ -29,8 +29,10 @@ Availability.init({
   weekday: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    min: WEEKDAYS.MONDAY,
-    max: WEEKDAYS.SATURDAY,
+    validate: {
+      min: WEEKDAYS.MONDAY,
+      max: WEEKDAYS.SATURDAY,
+    },
   },
   startHour: {
     type: DataTypes.TIME,

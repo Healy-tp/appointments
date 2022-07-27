@@ -1,12 +1,14 @@
 const router = require('express').Router();
+const _ = require('lodash');
 
 const logger = require('../../../logger');
 const availabilityController = require('../../../controllers/availability');
 
 /* ****** route definitions ****** */
 
-// Add isAdmin middleware check
+// Add isAdmin middleware check to createAvailability
 router.post('/', createAvailability);
+router.get('/:doctorId', getAvailabilityByDoctorId);
 
 module.exports = router;
 
@@ -36,6 +38,17 @@ function createAvailability(req, res) {
     validUntil,
   })
     .then((data) => res.status(201).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(500).send({ message: error.message });
+    });
+}
+
+function getAvailabilityByDoctorId(req, res) {
+  const doctorId = _.get(req, 'params.doctorId');
+
+  return availabilityController.getByDoctorId(doctorId)
+    .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
       res.status(500).send({ message: error.message });

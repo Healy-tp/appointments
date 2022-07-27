@@ -26,6 +26,7 @@ function getAppointmentById(req, res) {
 }
 
 function getAppointmentsByUserId(req, res) {
+  // We should retrieve this userId via currentUser or middleware, not queryParam
   const userId = _.get(req, 'query.userId');
 
   return apptController.getAppointmentsByUserId(userId)
@@ -45,11 +46,15 @@ function updateAppointment(req, res) {
     status,
   } = req.body;
 
+  // TODO: Add something to check if is doctor
+  // const isDoctor = _.get(req, 'currentUser.isDoctor', false)r
+  const isDoctor = false;
+
   if (!apptId) {
     return res.status(422).send({ message: 'You are missing required fields.' });
   }
 
-  return apptController.updateAppointment(apptId, {
+  return apptController.updateAppointment(apptId, isDoctor, {
     arrivalTime,
     doctorId,
     officeId,
