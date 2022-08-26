@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const _ = require('lodash');
+const { currentUser, hasPermissions } = require('@healy-tp/common');
 
 const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
@@ -8,7 +9,7 @@ const apptController = require('../../../controllers/appointment');
 // TODO: Improve error handling
 
 router.get('/:id', getAppointmentById);
-router.get('/', getAppointmentsByUserId);
+router.get('/', [currentUser, hasPermissions('EDIT_USERS')], getAppointmentsByUserId);
 router.put('/:id', updateAppointment);
 router.post('/', createAppointment);
 
