@@ -8,10 +8,11 @@ const apptController = require('../../../controllers/appointment');
 /* ****** route definitions ****** */
 // TODO: Improve error handling
 
-router.get('/:id', getAppointmentById);
+router.get('/all', getAllAppointments);
+router.get('/:id', [currentUser, hasPermissions('EDIT_USERS')], getAppointmentById);
 router.get('/', [currentUser, hasPermissions('EDIT_USERS')], getAppointmentsByUserId);
-router.put('/:id', updateAppointment);
-router.post('/', createAppointment);
+router.put('/:id', [currentUser, hasPermissions('EDIT_USERS')], updateAppointment);
+router.post('/', [currentUser, hasPermissions('EDIT_USERS')], createAppointment);
 
 module.exports = router;
 
@@ -26,9 +27,8 @@ function getAppointmentById(req, res) {
     });
 }
 
-function getAppointmentsByUserId(req, res) {
-  // We should retrieve this userId via currentUser or middleware, not queryParam
-  const userId = _.get(req, 'query.userId');
+async function getAppointmentsByUserId(req, res) {
+  const userId = req.currentUser.id;
 
   return apptController.getAppointmentsByUserId(userId)
     .then((data) => res.status(200).send({ data }))
@@ -48,7 +48,7 @@ function updateAppointment(req, res) {
   } = req.body;
 
   // TODO: Add something to check if is doctor
-  // const isDoctor = _.get(req, 'currentUser.isDoctor', false)r
+  // const isDoctor = _.get(req, 'currentUser.isDoctor', false)
   const isDoctor = false;
 
   if (!apptId) {
@@ -69,9 +69,9 @@ function updateAppointment(req, res) {
 }
 
 function createAppointment(req, res) {
-  // Probably userId will be retrieved from currentUser or another middleware
+  const userId = req.currentUser.id;
   const {
-    arrivalTime, doctorId, officeId, userId,
+    arrivalTime, doctorId, officeId,
   } = req.body;
 
   if (!arrivalTime || !doctorId || !officeId || !userId) {
@@ -85,6 +85,15 @@ function createAppointment(req, res) {
     userId,
   })
     .then((data) => res.status(201).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(500).send({ message: error.message });
+    });
+}
+
+function getAllAppointments(req, res) {
+  return apptController.getAllAppointments()
+    .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
       res.status(500).send({ message: error.message });

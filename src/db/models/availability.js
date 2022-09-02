@@ -16,6 +16,31 @@ class Availability extends Model {
       foreignKey: 'officeId',
     });
   }
+
+  static async getAllSlots(dt, oid) {
+    const dates = [];
+    const dateString = dt.toJSON().slice(0, 10);
+    const av = await this.findOne({
+      where: {
+        weekday: dt.getDay(),
+        officeId: oid,
+      },
+    });
+
+    if (!av || dt > new Date(av.validUntil)) {
+      return dates;
+    }
+
+    const startDt = new Date(`${dateString} ${av.startHour.slice(0, 5)}`);
+    const endDt = new Date(`${dateString} ${av.endHour.slice(0, 5)}`);
+
+    while (startDt < endDt) {
+      dates.push(new Date(startDt).getTime());
+      startDt.setMinutes(startDt.getMinutes() + av.frequency);
+    }
+
+    return dates;
+  }
 }
 
 Availability.init({
@@ -45,7 +70,9 @@ Availability.init({
   frequency: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    isIn: [FREQUENCIES],
+    validate: {
+      isIn: [FREQUENCIES],
+    },
   },
   validUntil: {
     type: DataTypes.DATEONLY,

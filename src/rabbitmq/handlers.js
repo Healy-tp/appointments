@@ -3,8 +3,8 @@ const logger = require('../logger');
 const { User } = require('../db/models/user');
 
 async function processUserCreatedEvent(content) {
-  const { firstName, lastName } = content.payload;
-  await User.create({ firstName, lastName });
+  const { firstName, lastName, id } = content.payload;
+  await User.create({ firstName, lastName, userId: id });
   logger.info('Successfully procesed USER_CREATED event');
 }
 

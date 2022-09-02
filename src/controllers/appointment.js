@@ -1,5 +1,6 @@
 const { Op, literal } = require('sequelize');
 const { Appointment } = require('../db/models/appointment');
+const { Availability } = require('../db/models/availability');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
 const self = {
@@ -7,6 +8,7 @@ const self = {
   getAppointmentById,
   getAppointmentsByUserId,
   updateAppointment,
+  getAllAppointments,
 };
 
 module.exports = self;
@@ -35,9 +37,14 @@ async function createAppointment({
   officeId,
   userId,
 }) {
+  const arrivalTimeDt = new Date(arrivalTime);
+  if (arrivalTimeDt < Date.now()) {
+    throw new Error('Cannot create an appointment at a past time');
+  }
+
   const existingAppt = await Appointment.findOne({
     where: {
-      arrivalTime,
+      arrivalTime: arrivalTimeDt,
       [Op.or]: [
         { officeId },
         { doctorId },
@@ -46,8 +53,14 @@ async function createAppointment({
     },
     raw: true,
   });
+
   if (existingAppt) {
     throw new Error('Cannot create an appointment at that time!');
+  }
+
+  const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
+  if (!dates.includes(arrivalTimeDt.getTime())) {
+    throw new Error('No slots available for the selected doctor at that time');
   }
 
   return Appointment.create({
@@ -69,4 +82,12 @@ function updateAppointment(id, isDoctor, updates) {
   }
 
   return Appointment.update(updates, filters);
+}
+
+async function getAllAppointments() {
+  const response = await Appointment.findAll({
+    attributes: ['doctorId', 'arrivalTime'],
+  });
+
+  return response;
 }

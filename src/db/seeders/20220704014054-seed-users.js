@@ -5,6 +5,7 @@ module.exports = {
       lastName: 'Doe',
       createdAt: new Date(),
       updatedAt: new Date(),
+      userId: 99999,
     }], {});
   },
 

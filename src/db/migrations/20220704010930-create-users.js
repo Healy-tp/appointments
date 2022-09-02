@@ -17,6 +17,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      userId: { // This field matches the user id in the 'users' service
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        unique: true,
+      },
     });
   },
   async down(queryInterface) {

@@ -8,6 +8,7 @@ const availabilityController = require('../../../controllers/availability');
 
 // Add isAdmin middleware check to createAvailability
 router.post('/', createAvailability);
+router.get('/', getAllRecords);
 router.get('/:doctorId', getAvailabilityByDoctorId);
 
 module.exports = router;
@@ -48,6 +49,15 @@ function getAvailabilityByDoctorId(req, res) {
   const doctorId = _.get(req, 'params.doctorId');
 
   return availabilityController.getByDoctorId(doctorId)
+    .then((data) => res.status(200).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(500).send({ message: error.message });
+    });
+}
+
+function getAllRecords(req, res) {
+  return availabilityController.getAllRecords()
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);

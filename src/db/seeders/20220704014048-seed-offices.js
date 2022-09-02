@@ -5,6 +5,12 @@ module.exports = {
       specialties: ['Dermatology', 'Neurology', 'Ophthalmology'],
       createdAt: new Date(),
       updatedAt: new Date(),
+    },
+    {
+      id: 2,
+      specialties: ['Dermatology', 'Neurology', 'Ophthalmology'],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }], {});
   },
 

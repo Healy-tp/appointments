@@ -21,6 +21,7 @@ class User extends Model {
 User.init({
   firstName: DataTypes.STRING,
   lastName: DataTypes.STRING,
+  userId: DataTypes.INTEGER, // This field matches with 'users' service id
 }, {
   sequelize,
   tableName: 'users',
