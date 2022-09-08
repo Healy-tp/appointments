@@ -3,6 +3,7 @@ const moment = require('moment');
 
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
 const { Availability } = require('../db/models/availability');
+const { Doctor } = require('../db/models/doctor');
 
 const self = {
   createAvailability,
@@ -68,6 +69,12 @@ async function getByDoctorId(doctorId) {
 }
 
 async function getAllRecords() {
-  const response = await Availability.findAll();
+  const response = await Availability.findAll({
+    attributes: ['id', 'officeId', 'weekday', 'startHour', 'endHour', 'frequency', 'validUntil'],
+    include: [{
+      model: Doctor,
+      attributes: ['id', 'firstName', 'lastName', 'specialty'],
+    }],
+  });
   return response;
 }

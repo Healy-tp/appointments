@@ -27,7 +27,6 @@ async function establishConnectionWithRabbitMQ() {
     channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.USER_CREATED_EVENT);
 
     await channel.consume(r.queue, (data) => {
-      // console.log(`Received ${Buffer.from(data.content)}`);
       handleData(data);
       channel.ack(data);
     });

@@ -8,7 +8,10 @@ class Doctor extends Model {
    * The `models/index` file will call this method automatically.
    */
   static associate(models) {
-    this.hasMany(models.Appointments, {
+    this.hasMany(models.Appointment, {
+      foreignKey: 'doctorId',
+    });
+    this.hasMany(models.Availability, {
       foreignKey: 'doctorId',
     });
   }
@@ -17,6 +20,7 @@ class Doctor extends Model {
     return [this.firstName, this.lastName].join(' ');
   }
 }
+
 
 Doctor.init({
   id: {

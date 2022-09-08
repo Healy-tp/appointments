@@ -4,6 +4,7 @@ const logger = require('./logger');
 const { establishConnectionWithRabbitMQ } = require('./rabbitmq');
 
 const { sequelize } = require('./db/dbsetup');
+const models = require('./db/models');
 
 const start = async () => {
   if (!config.PG_USER || !config.PG_PASSWORD || !config.PG_HOST || !config.PG_DB) {
@@ -12,6 +13,8 @@ const start = async () => {
 
   try {
     await sequelize.authenticate();
+    models.associate();
+
     logger.info('Connection has been established successfully.');
   } catch (err) {
     logger.error('Unable to connect to DB: ', err);

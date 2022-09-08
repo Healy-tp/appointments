@@ -1,6 +1,8 @@
 const { Op, literal } = require('sequelize');
 const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
+const { Doctor } = require('../db/models/doctor');
+const { User } = require('../db/models/user');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
 const self = {
@@ -84,10 +86,13 @@ function updateAppointment(id, isDoctor, updates) {
   return Appointment.update(updates, filters);
 }
 
-async function getAllAppointments() {
-  const response = await Appointment.findAll({
+async function getAllAppointments(forAdmin = false) {
+  const params = !forAdmin ? {
     attributes: ['doctorId', 'arrivalTime'],
-  });
+  } : {
+    include: [{ model: Doctor }, { model: User }],
+  };
+  const response = await Appointment.findAll(params);
 
   return response;
 }

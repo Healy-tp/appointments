@@ -4,15 +4,16 @@ const { currentUser, hasPermissions } = require('@healy-tp/common');
 
 const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
+const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 /* ****** route definitions ****** */
 // TODO: Improve error handling
 
 router.get('/all', getAllAppointments);
-router.get('/:id', [currentUser, hasPermissions('EDIT_USERS')], getAppointmentById);
-router.get('/', [currentUser, hasPermissions('EDIT_USERS')], getAppointmentsByUserId);
-router.put('/:id', [currentUser, hasPermissions('EDIT_USERS')], updateAppointment);
-router.post('/', [currentUser, hasPermissions('EDIT_USERS')], createAppointment);
+router.get('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentById);
+router.get('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentsByUserId);
+router.put('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], updateAppointment);
+router.post('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], createAppointment);
 
 module.exports = router;
 
