@@ -11,6 +11,7 @@ const { currentUser } = require('@healy-tp/common');
 router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
 router.get('/appointments', [currentUser], getAllAppointments);
+router.post('/appointments/create-for-user', [currentUser], createAppointmentForUser);
 
 module.exports = router;
 
@@ -46,6 +47,19 @@ function getAllAppointments(req, res) {
   }
 
   return apptController.getAllAppointments(true)
+    .then((data) => res.status(200).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(500).send({ message: error.message });
+    });
+}
+
+function createAppointmentForUser(req, res) {
+  if (req.currentUser.roleId !== 3) {
+    throw new Error(); // TODO: Move this to common lib
+  }
+
+  return apptController.createAppointment(req.body)
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
