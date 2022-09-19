@@ -21,7 +21,6 @@ class Doctor extends Model {
   }
 }
 
-
 Doctor.init({
   id: {
     type: DataTypes.INTEGER,

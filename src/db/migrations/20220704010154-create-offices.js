@@ -10,6 +10,10 @@ module.exports = {
         type: Sequelize.ARRAY(Sequelize.STRING),
         defaultValue: [],
       },
+      number: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

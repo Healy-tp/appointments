@@ -1,12 +1,11 @@
 const router = require('express').Router();
-// const _ = require('lodash');
 
+const { currentUser } = require('@healy-tp/common');
 const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
 const availabilityController = require('../../../controllers/availability');
 const officeController = require('../../../controllers/office');
 // const { RolesPermissions } = require('../../../db/models/rolesPermissions');
-const { currentUser } = require('@healy-tp/common');
 
 router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
@@ -16,7 +15,7 @@ router.post('/appointments/create-for-user', [currentUser], createAppointmentFor
 module.exports = router;
 
 function getAllAvailabilities(req, res) {
-  if (req.currentUser.roleId !== 3) {
+  if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
 
@@ -29,7 +28,7 @@ function getAllAvailabilities(req, res) {
 }
 
 function getAllOffices(req, res) {
-  if (req.currentUser.roleId !== 3) {
+  if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
 
@@ -42,7 +41,7 @@ function getAllOffices(req, res) {
 }
 
 function getAllAppointments(req, res) {
-  if (req.currentUser.roleId !== 3) {
+  if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
 
@@ -55,7 +54,7 @@ function getAllAppointments(req, res) {
 }
 
 function createAppointmentForUser(req, res) {
-  if (req.currentUser.roleId !== 3) {
+  if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
 

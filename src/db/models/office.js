@@ -23,7 +23,8 @@ Office.init({
     primaryKey: true,
     autoIncrement: true,
   },
-  specialties: { type: DataTypes.ARRAY(DataTypes.BIGINT), defaultValue: [] },
+  specialties: { type: DataTypes.ARRAY(DataTypes.CHAR), defaultValue: [] },
+  number: DataTypes.INTEGER,
 }, {
   sequelize,
   tableName: 'offices',
