@@ -11,6 +11,7 @@ router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
 router.get('/appointments', [currentUser], getAllAppointments);
 router.post('/appointments/create-for-user', [currentUser], createAppointmentForUser);
+router.post('/offices/create', [currentUser], createOffice);
 
 module.exports = router;
 
@@ -23,7 +24,7 @@ function getAllAvailabilities(req, res) {
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     });
 }
 
@@ -36,7 +37,7 @@ function getAllOffices(req, res) {
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     });
 }
 
@@ -49,7 +50,7 @@ function getAllAppointments(req, res) {
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     });
 }
 
@@ -59,9 +60,21 @@ function createAppointmentForUser(req, res) {
   }
 
   return apptController.createAppointment(req.body)
-    .then((data) => res.status(200).send({ data }))
+    .then((data) => res.status(201).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
+    });
+}
+
+function createOffice(req, res) {
+  if (req.currentUser?.roleId !== 3) {
+    throw new Error(); // TODO: Move this to common lib
+  }
+  return officeController.createOffice(req.body)
+    .then((data) => res.status(201).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      return res.status(500).send({ message: error.message });
     });
 }

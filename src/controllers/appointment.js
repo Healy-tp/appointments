@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const { Op, literal } = require('sequelize');
 const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
