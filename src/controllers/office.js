@@ -3,6 +3,7 @@ const { Office } = require('../db/models/office');
 
 const self = {
   createOffice,
+  editOffice,
   getAllOffices,
 };
 
@@ -36,4 +37,31 @@ async function createOffice({
     number: officeNumber,
     specialties,
   });
+}
+
+async function editOffice({
+  specialties,
+  officeNumber,
+  originalOfficeNumber,
+}) {
+  if (!officeNumber || !specialties || _.isEmpty(specialties)) {
+    throw new Error('Cannot edit an office without a valid office number or specialties');
+  }
+
+  const existingOffice = await Office.findOne({
+    where: {
+      number: originalOfficeNumber,
+    },
+    raw: true,
+  });
+
+  if (existingOffice) {
+    throw new Error(`An Office with number ${officeNumber} already exists.`);
+  }
+
+  const filters = { where: { number: originalOfficeNumber } };
+  return Office.update({
+    number: officeNumber,
+    specialties,
+  }, filters);
 }

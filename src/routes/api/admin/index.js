@@ -5,13 +5,13 @@ const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
 const availabilityController = require('../../../controllers/availability');
 const officeController = require('../../../controllers/office');
-// const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
 router.get('/appointments', [currentUser], getAllAppointments);
 router.post('/appointments/create-for-user', [currentUser], createAppointmentForUser);
 router.post('/offices/create', [currentUser], createOffice);
+router.put('/offices/edit', [currentUser], editOffice);
 
 module.exports = router;
 
@@ -73,6 +73,18 @@ function createOffice(req, res) {
   }
   return officeController.createOffice(req.body)
     .then((data) => res.status(201).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      return res.status(500).send({ message: error.message });
+    });
+}
+
+function editOffice(req, res) {
+  if (req.currentUser?.roleId !== 3) {
+    throw new Error(); // TODO: Move this to common lib
+  }
+  return officeController.editOffice(req.body)
+    .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
       return res.status(500).send({ message: error.message });
