@@ -29,7 +29,8 @@ async function getAppointmentsByUserId(userId) {
     where: {
       userId,
     },
-    raw: true,
+    attributes: ['arrivalTime', 'status', 'userId', 'doctorId', 'timesModifiedByUser', 'officeId'],
+    include: [{ model: Doctor, attributes: ['firstName', 'lastName', 'specialty'] }],
   };
   return Appointment.findAll(filters);
 }
