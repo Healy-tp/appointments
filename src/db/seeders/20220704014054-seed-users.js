@@ -1,11 +1,18 @@
 module.exports = {
   async up(queryInterface) {
     await queryInterface.bulkInsert('users', [{
-      firstName: 'John',
-      lastName: 'Doe',
+      firstName: 'Hernan',
+      lastName: 'Tain',
       createdAt: new Date(),
       updatedAt: new Date(),
-      userId: 99999,
+      userId: 1,
+    },
+    {
+      firstName: 'Demo',
+      lastName: 'User',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: 2,
     }], {});
   },
 
