@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { Op } = require('sequelize');
 const { Office } = require('../db/models/office');
 
 const self = {
@@ -40,28 +41,31 @@ async function createOffice({
 }
 
 async function editOffice({
+  id,
+  number,
   specialties,
-  officeNumber,
-  originalOfficeNumber,
 }) {
-  if (!officeNumber || !specialties || _.isEmpty(specialties)) {
+  if (!number || !specialties || _.isEmpty(specialties)) {
     throw new Error('Cannot edit an office without a valid office number or specialties');
   }
 
   const existingOffice = await Office.findOne({
     where: {
-      number: originalOfficeNumber,
+      number,
+      id: {
+        [Op.ne]: id,
+      },
     },
     raw: true,
   });
 
   if (existingOffice) {
-    throw new Error(`An Office with number ${officeNumber} already exists.`);
+    throw new Error(`An Office with number ${number} already exists.`);
   }
 
-  const filters = { where: { number: originalOfficeNumber } };
+  const filters = { where: { id } };
   return Office.update({
-    number: officeNumber,
+    number,
     specialties,
   }, filters);
 }

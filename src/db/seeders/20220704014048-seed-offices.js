@@ -1,13 +1,13 @@
 module.exports = {
   async up(queryInterface) {
     await queryInterface.bulkInsert('offices', [{
-      specialties: ['Dermatology', 'Neurology', 'Ophthalmology'],
+      specialties: ['Dermathology', 'Ophthalmology'],
       number: 200,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
-      specialties: ['Dermatology', 'Neurology'],
+      specialties: ['Dermathology'],
       number: 201,
       createdAt: new Date(),
       updatedAt: new Date(),
