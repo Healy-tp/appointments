@@ -25,9 +25,12 @@ Doctor.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true,
   },
   firstName: DataTypes.STRING,
   lastName: DataTypes.STRING,
+  status: DataTypes.STRING,
+  userId: DataTypes.INTEGER, // This field matches with 'users' service id
   specialty: DataTypes.STRING,
 }, {
   sequelize,
