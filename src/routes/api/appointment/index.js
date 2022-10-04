@@ -14,6 +14,7 @@ router.get('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)]
 router.get('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentsByUserId);
 router.put('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], updateAppointment);
 router.post('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], createAppointment);
+router.post('/:id/start-chat', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], startChat);
 
 module.exports = router;
 
@@ -94,6 +95,17 @@ function createAppointment(req, res) {
 
 function getAllAppointments(req, res) {
   return apptController.getAllAppointments()
+    .then((data) => res.status(200).send({ data }))
+    .catch((error) => {
+      logger.error(error.message);
+      res.status(500).send({ message: error.message });
+    });
+}
+
+function startChat(req, res) {
+  const apptId = _.get(req, 'params.id');
+
+  apptController.startChat(apptId)
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);

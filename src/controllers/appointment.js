@@ -4,6 +4,8 @@ const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
+const { sendMessage } = require('../rabbitmq/sender');
+const c = require('../rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
 const self = {
@@ -12,6 +14,7 @@ const self = {
   getAppointmentsByUserId,
   updateAppointment,
   getAllAppointments,
+  startChat,
 };
 
 module.exports = self;
@@ -29,7 +32,8 @@ async function getAppointmentsByUserId(userId) {
     where: {
       userId,
     },
-    raw: true,
+    attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
+    include: [{ model: Doctor, attributes: ['firstName', 'lastName', 'specialty'] }],
   };
   return Appointment.findAll(filters);
 }
@@ -96,4 +100,14 @@ async function getAllAppointments(forAdmin = false) {
   const response = await Appointment.findAll(params);
 
   return response;
+}
+
+async function startChat(apptId) {
+  const appt = await Appointment.findOne({ where: { id: apptId } });
+  sendMessage(c.CHAT_STARTED_EVENT, {
+    appointmentId: appt.id,
+    userId: appt.userId,
+    doctorId: appt.doctorId,
+    arrivalTime: appt.arrivalTime,
+  });
 }

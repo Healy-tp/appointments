@@ -49,7 +49,13 @@ Availability.init({
     autoIncrement: true,
     primaryKey: true,
   },
-  doctorId: DataTypes.INTEGER,
+  doctorId: {
+    type: DataTypes.INTEGER,
+    // references: {
+    //   model: Doctor,
+    //   key: 'userId',
+    // },
+  },
   officeId: DataTypes.INTEGER,
   weekday: {
     type: DataTypes.INTEGER,

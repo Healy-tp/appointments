@@ -1,6 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
 const { MAX_APPOINTMENT_UPDATES } = require('../../utils/constants');
 const { sequelize } = require('../dbsetup');
+const { Doctor } = require('./doctor');
 
 class Appointment extends Model {
   /*
@@ -31,7 +32,13 @@ Appointment.init({
     autoIncrement: true,
     primaryKey: true,
   },
-  doctorId: DataTypes.INTEGER,
+  doctorId: {
+    type: DataTypes.INTEGER,
+    // references: {
+    //   model: Doctor,
+    //   key: 'userId',
+    // },
+  },
   userId: DataTypes.INTEGER,
   officeId: DataTypes.INTEGER,
   arrivalTime: DataTypes.DATE,

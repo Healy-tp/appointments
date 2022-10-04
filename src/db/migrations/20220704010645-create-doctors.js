@@ -3,6 +3,8 @@ module.exports = {
     await queryInterface.createTable('doctors', {
       id: {
         type: Sequelize.INTEGER,
+        // autoIncrement: true,
+        allowNull: false,
         primaryKey: true,
       },
       firstName: Sequelize.STRING,
@@ -16,6 +18,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      // userId: { // This field matches the user id in the 'users' service
+      //   type: Sequelize.INTEGER,
+      //   allowNull: false,
+      //   // primaryKey: true,
+      //   unique: true,
+      // },
     });
   },
   async down(queryInterface) {

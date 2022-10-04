@@ -35,11 +35,11 @@ async function establishConnectionWithRabbitMQ() {
   }
 }
 
-// function getRabbitMQConnection() {
-//   return connection;
-// }
+function getRabbitMQConnection() {
+  return connection;
+}
 
 module.exports = {
   establishConnectionWithRabbitMQ,
-  // getRabbitMQConnection,
+  getRabbitMQConnection,
 };

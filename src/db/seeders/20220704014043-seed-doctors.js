@@ -8,6 +8,7 @@ module.exports = {
         specialty: 'Dermatology',
         createdAt: new Date(),
         updatedAt: new Date(),
+        id: 3,
       },
       {
         id: 2,
@@ -16,6 +17,7 @@ module.exports = {
         specialty: 'General',
         createdAt: new Date(),
         updatedAt: new Date(),
+        id: 4,
       }], {});
   },
 

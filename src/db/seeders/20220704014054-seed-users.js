@@ -5,7 +5,14 @@ module.exports = {
       lastName: 'Doe',
       createdAt: new Date(),
       updatedAt: new Date(),
-      userId: 99999,
+      id: 1,
+    },
+    {
+      firstName: 'Demo',
+      lastName: 'User',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: 2,
     }], {});
   },
 
