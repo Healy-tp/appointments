@@ -8,7 +8,7 @@ module.exports = {
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: 3,
+        id: 3,
       },
       {
         firstName: 'Doctor',
@@ -17,7 +17,7 @@ module.exports = {
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: 4,
+        id: 4,
       }], {});
   },
 

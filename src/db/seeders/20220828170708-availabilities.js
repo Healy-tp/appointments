@@ -12,18 +12,18 @@ module.exports = {
      * }], {});
     */
     await queryInterface.bulkInsert('availabilities', [{
-      doctorId: 1,
+      doctorId: 3,
       officeId: 1,
       weekday: 2,
       startHour: '13:00',
       endHour: '16:00',
       frequency: 60,
-      validUntil: new Date(2022, 9, 1),
+      validUntil: new Date(2022, 10, 1),
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
-      doctorId: 2,
+      doctorId: 4,
       officeId: 2,
       weekday: 4,
       startHour: '10:00',
@@ -34,7 +34,7 @@ module.exports = {
       updatedAt: new Date(),
     },
     {
-      doctorId: 2,
+      doctorId: 4,
       officeId: 2,
       weekday: 5,
       startHour: '10:00',
