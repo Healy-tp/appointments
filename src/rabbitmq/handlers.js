@@ -1,6 +1,7 @@
 const c = require('./constants');
 const logger = require('../logger');
 const { User } = require('../db/models/user');
+const { Doctor } = require('../db/models/doctor');
 
 async function processUserCreatedEvent(content) {
   const { firstName, lastName, id } = content.payload;
@@ -26,6 +27,14 @@ function handleData(data) {
   switch (content.event) {
     case c.USER_CREATED_EVENT:
       processUserCreatedEvent(content);
+      break;
+
+    case c.DOCTOR_CREATED_EVENT:
+      processDoctorCreatedEvent(content);
+      break;
+
+    case c.DOCTOR_CONFIRMED_EVENT:
+      processDoctorConfirmedEvent(content.payload);
       break;
 
     default:

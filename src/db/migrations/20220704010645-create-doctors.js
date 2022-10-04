@@ -6,10 +6,13 @@ module.exports = {
         // autoIncrement: true,
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
       firstName: Sequelize.STRING,
       lastName: Sequelize.STRING,
       specialty: Sequelize.STRING,
+      status: Sequelize.STRING,
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

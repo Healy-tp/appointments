@@ -71,11 +71,12 @@ function createOffice(req, res) {
   if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
+
   return officeController.createOffice(req.body)
     .then((data) => res.status(201).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      return res.status(500).send({ message: error.message });
+      res.status(500).send({ message: error.message });
     });
 }
 
@@ -83,10 +84,11 @@ function editOffice(req, res) {
   if (req.currentUser?.roleId !== 3) {
     throw new Error(); // TODO: Move this to common lib
   }
+
   return officeController.editOffice(req.body)
     .then((data) => res.status(200).send({ data }))
     .catch((error) => {
       logger.error(error.message);
-      return res.status(500).send({ message: error.message });
+      res.status(500).send({ message: error.message });
     });
 }

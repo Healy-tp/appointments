@@ -25,6 +25,8 @@ async function establishConnectionWithRabbitMQ() {
     });
 
     channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.USER_CREATED_EVENT);
+    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.DOCTOR_CREATED_EVENT);
+    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.DOCTOR_CONFIRMED_EVENT);
 
     await channel.consume(r.queue, (data) => {
       handleData(data);
