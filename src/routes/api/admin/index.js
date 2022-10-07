@@ -15,80 +15,80 @@ router.put('/offices/edit', [currentUser], editOffice);
 
 module.exports = router;
 
-function getAllAvailabilities(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function getAllAvailabilities(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await availabilityController.getAllRecords();
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return availabilityController.getAllRecords()
-    .then((data) => res.status(200).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      return res.status(500).send({ message: error.message });
-    });
 }
 
-function getAllOffices(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function getAllOffices(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await officeController.getAllOffices();
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return officeController.getAllOffices()
-    .then((data) => res.status(200).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      return res.status(500).send({ message: error.message });
-    });
 }
 
-function getAllAppointments(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function getAllAppointments(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await apptController.getAllAppointments(true);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return apptController.getAllAppointments(true)
-    .then((data) => res.status(200).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      return res.status(500).send({ message: error.message });
-    });
 }
 
-function createAppointmentForUser(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function createAppointmentForUser(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await apptController.createAppointment(req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return apptController.createAppointment(req.body)
-    .then((data) => res.status(201).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      return res.status(500).send({ message: error.message });
-    });
 }
 
-function createOffice(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function createOffice(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await officeController.createOffice(req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return officeController.createOffice(req.body)
-    .then((data) => res.status(201).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      res.status(500).send({ message: error.message });
-    });
 }
 
-function editOffice(req, res) {
-  if (req.currentUser?.roleId !== 3) {
-    throw new Error(); // TODO: Move this to common lib
+async function editOffice(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await officeController.editOffice(req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
   }
-
-  return officeController.editOffice(req.body)
-    .then((data) => res.status(200).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      res.status(500).send({ message: error.message });
-    });
 }

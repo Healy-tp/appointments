@@ -1,4 +1,5 @@
 const express = require('express');
+const { errorHandler } = require('@healy-tp/common');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -29,5 +30,7 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use(errorHandler);
 
 module.exports = app;

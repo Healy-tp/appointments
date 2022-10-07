@@ -6,11 +6,12 @@ router.get('/', getDoctors);
 
 module.exports = router;
 
-function getDoctors(req, res) {
-  return doctorsController.getDoctors()
-    .then((data) => res.status(200).send({ data }))
-    .catch((error) => {
-      logger.error(error.message);
-      res.status(500).send({ message: error.message });
-    });
+async function getDoctors(req, res, next) {
+  try {
+    const response = await doctorsController.getDoctors();
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
 }
