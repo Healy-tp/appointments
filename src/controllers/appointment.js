@@ -13,6 +13,7 @@ const self = {
   getAppointmentById,
   getAppointmentsByUserId,
   updateAppointment,
+  deleteAppointment,
   getAllAppointments,
   startChat,
 };
@@ -27,13 +28,19 @@ async function getAppointmentById(id) {
   return appointment;
 }
 
-async function getAppointmentsByUserId(userId) {
+async function getAppointmentsByUserId(userId, isDoctor) {
+  const where = isDoctor ? { doctorId: userId} : { userId };
   const filters = {
-    where: {
-      userId,
-    },
+    where,
     attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
-    include: [{ model: Doctor, attributes: ['firstName', 'lastName', 'specialty'] }],
+    include: [{
+      model: Doctor,
+      attributes: ['firstName', 'lastName', 'specialty'] 
+    },
+    {
+      model: User,
+    },
+    ],
   };
   return Appointment.findAll(filters);
 }
@@ -79,16 +86,34 @@ async function createAppointment({
   });
 }
 
-function updateAppointment(id, isDoctor, updates) {
-  const filters = { where: { id } };
-
-  if (isDoctor) {
-    updates.status = APPOINTMENT_STATUS.TO_CONFIRM;
-  } else {
-    updates.timesModifiedByUser = literal('"timesModifiedByUser" + 1');
+async function updateAppointment(id, isDoctor, updates) {
+  const { arrivalTime, officeId } = updates;
+  const arrivalTimeDt = new Date(arrivalTime);
+  if (arrivalTimeDt < Date.now()) {
+    throw new Error('Cannot create an appointment at a past time');
   }
 
-  return Appointment.update(updates, filters);
+  const filters = { where: { id } };
+  const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
+  if (!dates.includes(arrivalTimeDt.getTime())) {
+    throw new Error('No slots available for the selected doctor at that time');
+  }
+
+  // if (isDoctor) {
+  //   updates.status = APPOINTMENT_STATUS.TO_CONFIRM;
+  // } else {
+  //   updates.timesModifiedByUser = literal('"timesModifiedByUser" + 1');
+  // }
+
+  const existingAppt = await Appointment.findOne(filters);
+  return existingAppt.update({
+    ...updates,
+    timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
+  });
+}
+
+async function deleteAppointment(id) {
+  await Appointment.destroy({ where: { id } });
 }
 
 async function getAllAppointments(forAdmin = false) {

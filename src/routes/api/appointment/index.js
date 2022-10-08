@@ -11,8 +11,9 @@ const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 router.get('/all', getAllAppointments);
 router.get('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentById);
-router.get('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentsByUserId);
+router.get('/', [currentUser], getAppointmentsByUserId);
 router.put('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], updateAppointment);
+router.delete('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], deleteAppointment);
 router.post('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], createAppointment);
 router.post('/:id/start-chat', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], startChat);
 
@@ -32,7 +33,7 @@ async function getAppointmentById(req, res, next) {
 async function getAppointmentsByUserId(req, res, next) {
   try {
     const userId = req.currentUser.id;
-    const response = await apptController.getAppointmentsByUserId(userId);
+    const response = await apptController.getAppointmentsByUserId(userId, req.query.isDoctor === 'true');
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -43,7 +44,7 @@ async function getAppointmentsByUserId(req, res, next) {
 async function updateAppointment(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const { arrivalTime, doctorId, officeId, status } = req.body;
+    const { arrivalTime, doctorId, officeId } = req.body;
 
     // TODO: Add something to check if is doctor
     // const isDoctor = _.get(req, 'currentUser.isDoctor', false)
@@ -53,11 +54,13 @@ async function updateAppointment(req, res, next) {
       return res.status(422).send({ message: 'You are missing required fields.' });
     }
 
+    console.log('APPT ID::', apptId);
+
     const response = await apptController.updateAppointment(apptId, isDoctor, {
       arrivalTime,
       doctorId,
       officeId,
-      status,
+      // status,
     });
     res.status(200).send(response);
   } catch (err) {
@@ -83,6 +86,17 @@ async function createAppointment(req, res, next) {
       officeId,
       userId,
     });
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function deleteAppointment(req, res, next) {
+  try {
+    const apptId = _.get(req, 'params.id');
+    const response = await apptController.deleteAppointment(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
