@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const { Op } = require('sequelize');
 const moment = require('moment');
 
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
@@ -9,6 +10,7 @@ const self = {
   createAvailability,
   getByDoctorId,
   getAllRecords,
+  editAvailability,
 };
 
 module.exports = self;
@@ -77,4 +79,33 @@ async function getAllRecords() {
     }],
   });
   return response;
+}
+
+async function editAvailability({
+  id,
+  frequency,
+  validUntil,
+}) {
+  if (!frequency || !validUntil) {
+    throw new Error('Cannot edit an availability without a valid frequency or valid until date');
+  }
+
+  const availability = await Availability.findOne({
+    where: {
+      id: {
+        [Op.ne]: id,
+      },
+    },
+    raw: true,
+  });
+
+  if (!availability) {
+    throw new Error(`Availability "${id}" not found.`);
+  }
+
+  const filters = { where: { id } };
+  return Availability.update({
+    frequency,
+    validUntil,
+  }, filters);
 }

@@ -9,9 +9,12 @@ const officeController = require('../../../controllers/office');
 router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
 router.get('/appointments', [currentUser], getAllAppointments);
+
 router.post('/appointments/create-for-user', [currentUser], createAppointmentForUser);
 router.post('/offices/create', [currentUser], createOffice);
+
 router.put('/offices/edit', [currentUser], editOffice);
+router.put('/availabilities/edit', [currentUser], editAvailability);
 
 module.exports = router;
 
@@ -86,6 +89,19 @@ async function editOffice(req, res, next) {
       throw new Error(); // TODO: Move this to common lib
     }
     const response = await officeController.editOffice(req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function editAvailability(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await availabilityController.editAvailability(req.body);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

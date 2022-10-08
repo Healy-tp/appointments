@@ -35,7 +35,7 @@ async function getAppointmentsByUserId(userId, isDoctor) {
     attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
     include: [{
       model: Doctor,
-      attributes: ['firstName', 'lastName', 'specialty'] 
+      attributes: ['firstName', 'lastName', 'specialty'],
     },
     {
       model: User,
