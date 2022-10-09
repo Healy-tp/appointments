@@ -72,6 +72,22 @@ async function createAppointment({
     throw new Error('Cannot create an appointment at that time!');
   }
 
+  const sameDayAppt = await Appointment.findOne({
+    where: {
+      userId,
+      arrivalTime: {
+        [Op.between]: [
+          new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
+          new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
+        ],
+      }
+    },
+  });
+
+  if (sameDayAppt) {
+    throw new Error('You already have an appointment for that day');
+  }
+
   const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
   if (!dates.includes(arrivalTimeDt.getTime())) {
     throw new Error('No slots available for the selected doctor at that time');

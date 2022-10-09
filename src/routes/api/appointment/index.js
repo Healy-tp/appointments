@@ -15,7 +15,7 @@ router.get('/', [currentUser], getAppointmentsByUserId);
 router.put('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], updateAppointment);
 router.delete('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], deleteAppointment);
 router.post('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], createAppointment);
-router.post('/:id/start-chat', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], startChat);
+router.post('/:id/start-chat', [currentUser], startChat);
 
 module.exports = router;
 
