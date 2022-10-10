@@ -15,6 +15,7 @@ router.post('/offices/create', [currentUser], createOffice);
 
 router.put('/offices/edit', [currentUser], editOffice);
 router.put('/availabilities/edit', [currentUser], editAvailability);
+router.put('/appointment/edit', [currentUser], editAppointment);
 
 module.exports = router;
 
@@ -102,6 +103,19 @@ async function editAvailability(req, res, next) {
       throw new Error(); // TODO: Move this to common lib
     }
     const response = await availabilityController.editAvailability(req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function editAppointment(req, res, next) {
+  try {
+    if (req.currentUser?.roleId !== 3) {
+      throw new Error(); // TODO: Move this to common lib
+    }
+    const response = await apptController.editAppointment(req.body);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

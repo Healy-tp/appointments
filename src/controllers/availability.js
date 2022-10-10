@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const { Op } = require('sequelize');
 const moment = require('moment');
 
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
@@ -92,9 +91,7 @@ async function editAvailability({
 
   const availability = await Availability.findOne({
     where: {
-      id: {
-        [Op.ne]: id,
-      },
+      id,
     },
     raw: true,
   });

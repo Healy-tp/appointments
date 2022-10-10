@@ -1,15 +1,17 @@
 /* eslint-disable no-param-reassign */
 const { Op, literal } = require('sequelize');
+const _ = require('lodash');
 const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
 const { sendMessage } = require('../rabbitmq/sender');
-const c = require('../rabbitmq/constants');
+const queueConstants = require('../rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
 const self = {
   createAppointment,
+  editAppointment,
   getAppointmentById,
   getAppointmentsByUserId,
   updateAppointment,
@@ -128,6 +130,31 @@ async function updateAppointment(id, isDoctor, updates) {
   });
 }
 
+async function editAppointment({
+  id,
+  status,
+}) {
+  if (!status || !_.includes(_.values(APPOINTMENT_STATUS), status)) {
+    throw new Error('Cannot edit an appointment without a valid status');
+  }
+
+  const appt = await Appointment.findOne({
+    where: {
+      id,
+    },
+    raw: true,
+  });
+
+  if (!appt) {
+    throw new Error(`Appointment "${id}" not found.`);
+  }
+
+  const filters = { where: { id } };
+  return Appointment.update({
+    status,
+  }, filters);
+}
+
 async function deleteAppointment(id) {
   await Appointment.destroy({ where: { id } });
 }
@@ -145,7 +172,7 @@ async function getAllAppointments(forAdmin = false) {
 
 async function startChat(apptId) {
   const appt = await Appointment.findOne({ where: { id: apptId } });
-  sendMessage(c.CHAT_STARTED_EVENT, {
+  sendMessage(queueConstants.CHAT_STARTED_EVENT, {
     appointmentId: appt.id,
     userId: appt.userId,
     doctorId: appt.doctorId,
