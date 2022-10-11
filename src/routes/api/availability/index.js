@@ -3,21 +3,22 @@ const _ = require('lodash');
 
 const logger = require('../../../logger');
 const availabilityController = require('../../../controllers/availability');
+const { currentUser } = require('@healy-tp/common');
 
 /* ****** route definitions ****** */
 
 // Add isAdmin middleware check to createAvailability
-router.post('/', createAvailability);
-router.get('/', getAllRecords);
-router.get('/:doctorId', getAvailabilityByDoctorId);
+router.post('/', currentUser, createAvailability);
+router.get('/all', getAllRecords);
+router.get('/', currentUser, getAvailabilityByDoctorId);
 
 module.exports = router;
 
 async function createAvailability(req, res, next) {
   try {
   // Probably userId will be retrieved from currentUser or another middleware
+    const doctorId = req.currentUser.id;
     const {
-      doctorId,
       officeId,
       weekday,
       startHour,
@@ -48,7 +49,8 @@ async function createAvailability(req, res, next) {
 
 async function getAvailabilityByDoctorId(req, res, next) {
   try {
-    const doctorId = _.get(req, 'params.doctorId');
+    // const doctorId = _.get(req, 'params.doctorId');
+    const doctorId = req.currentUser.id;
     const response = await availabilityController.getByDoctorId(doctorId);
     res.status(200).send(response);
   } catch (err) {
