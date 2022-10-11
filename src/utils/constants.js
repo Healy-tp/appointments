@@ -15,7 +15,7 @@ const WEEKDAYS = Object.freeze({
 });
 
 // Each frequency is represented in minutes
-const FREQUENCIES = [15, 30, 45, 60];
+const FREQUENCIES = [15, 30, 60];
 
 const MAX_APPOINTMENT_UPDATES = 3;
 
