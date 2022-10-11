@@ -37,7 +37,26 @@ async function createAvailability({
     throw new Error('Selected availability date is already expired');
   }
 
-  // TODO: add validation for office at that hour
+  // TODO: Check validUntil
+  const availabilitiesInOffice = await Availability.findAll({
+    where: {
+      officeId,
+      weekday,
+      [Op.or]: [{
+        startHour: {
+          [Op.between]: [startHour, endHour], // TODO: Fix bug and make between range not inclusive
+        },
+      }, {
+        endHour: {
+          [Op.between]: [startHour, endHour],
+        },
+      }],
+    },
+  });
+  if (availabilitiesInOffice.length > 0) {
+    throw new Error('Selected hours are invalid. Office is occupied for that date in the selected hour range');
+  }
+
   const existingAvailability = await Availability.findOne({
     where: {
       doctorId,
@@ -46,7 +65,7 @@ async function createAvailability({
     raw: true,
   });
   if (existingAvailability) {
-    throw new Error(`Doctor ${doctorId} already have an availability on day ${weekday}`);
+    throw new Error(`Doctor ${doctorId} already has an availability on day ${weekday}`);
   }
 
   return Availability.create({
