@@ -6,6 +6,7 @@ const { establishConnectionWithRabbitMQ } = require('./rabbitmq');
 const { sequelize } = require('./db/dbsetup');
 const models = require('./db/models');
 
+
 const start = async () => {
   if (!config.PG_USER || !config.PG_PASSWORD || !config.PG_HOST || !config.PG_DB) {
     throw new Error('PG_USER, PG_PASSWORD, PG_HOST and PG_DB must be defined');

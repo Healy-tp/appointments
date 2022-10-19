@@ -2,7 +2,7 @@ const logger = require('../logger');
 const { getRabbitMQConnection } = require('./index');
 const c = require('./constants');
 
-async function sendMessageToAppointments(event, payload) {
+async function sendMessageToExchange(event, payload) {
   try {
     const connection = getRabbitMQConnection();
     const channel = await connection.createChannel();
@@ -26,15 +26,7 @@ async function sendMessageToAppointments(event, payload) {
 }
 
 async function sendMessage(event, payload) {
-  switch (event) {
-    case 'CHAT_STARTED':
-      await sendMessageToAppointments(event, payload);
-      break;
-
-    default:
-      logger.warning('Unrecogonized message');
-      break;
-  }
+  await sendMessageToExchange(event, payload);
 }
 
 module.exports = {

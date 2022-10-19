@@ -1,4 +1,6 @@
 const express = require('express');
+const cron = require('node-cron');
+
 const { errorHandler } = require('@healy-tp/common');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
@@ -6,6 +8,11 @@ const cors = require('cors');
 const cookieSession = require('cookie-session');
 
 const routes = require('./routes/api');
+const { checkAppointmentsForReminders } = require('./reminders');
+
+cron.schedule('* * * * *', () => {
+  checkAppointmentsForReminders();
+});
 
 const app = express();
 
