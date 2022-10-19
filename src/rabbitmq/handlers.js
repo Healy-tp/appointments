@@ -1,4 +1,4 @@
-const c = require('./constants');
+const rabbitMQConstants = require('./constants');
 const logger = require('../logger');
 const { User } = require('../db/models/user');
 const { Doctor } = require('../db/models/doctor');
@@ -6,6 +6,16 @@ const { Doctor } = require('../db/models/doctor');
 async function processUserCreatedEvent(content) {
   const { firstName, lastName, id } = content.payload;
   await User.create({ firstName, lastName, id });
+  logger.info('Successfully procesed USER_CREATED event');
+}
+
+async function processUserUpdatedEvent(content) {
+  const { firstName, lastName, id } = content.payload;
+  if (!content.payload.isDoctor) {
+    await User.update({ firstName, lastName }, { where: { id } });
+  } else {
+    await Doctor.update({ firstName, lastName }, { where: { id } });
+  }
   logger.info('Successfully procesed USER_CREATED event');
 }
 
@@ -25,16 +35,20 @@ async function processDoctorConfirmedEvent({ id }) {
 function handleData(data) {
   const content = JSON.parse(data.content);
   switch (content.event) {
-    case c.USER_CREATED_EVENT:
+    case rabbitMQConstants.USER_CREATED_EVENT:
       processUserCreatedEvent(content);
       break;
 
-    case c.DOCTOR_CREATED_EVENT:
+    case rabbitMQConstants.DOCTOR_CREATED_EVENT:
       processDoctorCreatedEvent(content);
       break;
 
-    case c.DOCTOR_CONFIRMED_EVENT:
+    case rabbitMQConstants.DOCTOR_CONFIRMED_EVENT:
       processDoctorConfirmedEvent(content.payload);
+      break;
+
+    case rabbitMQConstants.USER_UPDATED_EVENT:
+      processUserUpdatedEvent(content);
       break;
 
     default:

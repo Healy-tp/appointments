@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
-const { Op, literal } = require('sequelize');
+const { Op } = require('sequelize');
 const _ = require('lodash');
+const moment = require('moment');
+
 const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
@@ -18,6 +20,7 @@ const self = {
   deleteAppointment,
   getAllAppointments,
   startChat,
+  getAppointmentsInInterval,
 };
 
 module.exports = self;
@@ -74,6 +77,7 @@ async function createAppointment({
     throw new Error('Cannot create an appointment at that time!');
   }
 
+  // TODO: Fix this
   const sameDayAppt = await Appointment.findOne({
     where: {
       userId,
@@ -178,4 +182,16 @@ async function startChat(apptId) {
     doctorId: appt.doctorId,
     arrivalTime: appt.arrivalTime,
   });
+}
+
+async function getAppointmentsInInterval(days) {
+  const appointments = await Appointment.findAll({
+    attributes: ['arrivalTime', 'doctorId', 'userId'],
+    where: {
+      arrivalTime: {
+        [Op.between]: [moment().format(), moment().add(days, 'days').format()],
+      },
+    },
+  });
+  return appointments;
 }

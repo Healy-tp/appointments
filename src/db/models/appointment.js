@@ -34,10 +34,6 @@ Appointment.init({
   },
   doctorId: {
     type: DataTypes.INTEGER,
-    // references: {
-    //   model: Doctor,
-    //   key: 'userId',
-    // },
   },
   userId: DataTypes.INTEGER,
   officeId: DataTypes.INTEGER,
