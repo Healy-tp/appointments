@@ -63,7 +63,7 @@ async function createAppointmentForUser(req, res, next) {
     if (req.currentUser?.roleId !== 3) {
       throw new Error(); // TODO: Move this to common lib
     }
-    const response = await apptController.createAppointment(req.body);
+    const response = await apptController.createAppointment(req.body, true);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

@@ -63,6 +63,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      extraAppts: {
+        type: Sequelize.INTEGER,
+      },
     });
   },
   async down(queryInterface) {

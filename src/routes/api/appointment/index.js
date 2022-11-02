@@ -85,7 +85,7 @@ async function createAppointment(req, res, next) {
       doctorId,
       officeId,
       userId,
-    });
+    }, false);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

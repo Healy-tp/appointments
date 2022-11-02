@@ -55,48 +55,56 @@ async function createAppointment({
   doctorId,
   officeId,
   userId,
-}) {
-  const arrivalTimeDt = new Date(arrivalTime);
-  if (arrivalTimeDt < Date.now()) {
-    throw new Error('Cannot create an appointment at a past time');
-  }
+  isExtraAppt,
+}, isAdmin) {
+  let extraApptDt = null;
+  const extraAppt = isExtraAppt && isAdmin;
+  if (!extraAppt) {
+    const arrivalTimeDt = new Date(arrivalTime);
+    if (arrivalTimeDt < Date.now()) {
+      throw new Error('Cannot create an appointment at a past time');
+    }
 
-  const existingAppt = await Appointment.findOne({
-    where: {
-      arrivalTime: arrivalTimeDt,
-      [Op.or]: [
-        { officeId },
-        { doctorId },
-        { userId },
-      ],
-    },
-    raw: true,
-  });
-
-  if (existingAppt) {
-    throw new Error('Cannot create an appointment at that time!');
-  }
-
-  // TODO: Fix this
-  const sameDayAppt = await Appointment.findOne({
-    where: {
-      userId,
-      arrivalTime: {
-        [Op.between]: [
-          new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
-          new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
+    const existingAppt = await Appointment.findOne({
+      where: {
+        arrivalTime: arrivalTimeDt,
+        [Op.or]: [
+          { officeId },
+          { doctorId },
+          { userId },
         ],
-      }
-    },
-  });
+      },
+      raw: true,
+    });
 
-  if (sameDayAppt) {
-    throw new Error('You already have an appointment for that day');
-  }
+    if (existingAppt) {
+      throw new Error('Cannot create an appointment at that time!');
+    }
 
-  const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
-  if (!dates.includes(arrivalTimeDt.getTime())) {
-    throw new Error('No slots available for the selected doctor at that time');
+    // TODO: Fix this
+    const sameDayAppt = await Appointment.findOne({
+      where: {
+        userId,
+        arrivalTime: {
+          [Op.between]: [
+            new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
+            new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
+          ],
+        }
+      },
+    });
+
+    if (sameDayAppt) {
+      throw new Error('You already have an appointment for that day');
+    }
+
+    const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
+    if (!dates.includes(arrivalTimeDt.getTime())) {
+      throw new Error('No slots available for the selected doctor at that time');
+    }
+  } else {
+    extraApptDt = extraAppt ? arrivalTime : null;
+    arrivalTime = null;
   }
 
   return Appointment.create({
@@ -104,7 +112,8 @@ async function createAppointment({
     doctorId,
     officeId,
     userId,
-    status: APPOINTMENT_STATUS.CREATED,
+    extraAppt: extraApptDt,
+    status: APPOINTMENT_STATUS.CONFIRMED,
   });
 }
 
