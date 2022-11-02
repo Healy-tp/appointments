@@ -40,7 +40,12 @@ module.exports = {
         allowNull: false,
       },
       arrivalTime: Sequelize.DATE,
-      status: Sequelize.STRING,
+      status: {
+        type: Sequelize.STRING,
+        validate: {
+          isIn: [['confirmed', 'to_confirm', 'attended', 'cancelled']],
+        },
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -48,6 +53,9 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
+      },
+      extraAppt: {
+        type: Sequelize.DATEONLY,
       },
     });
   },

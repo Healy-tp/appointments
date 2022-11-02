@@ -18,9 +18,10 @@ module.exports = {
       startHour: '13:00',
       endHour: '16:00',
       frequency: 60,
-      validUntil: new Date(2022, 10, 1),
+      validUntil: new Date(2022, 11, 1),
       createdAt: new Date(),
       updatedAt: new Date(),
+      extraAppts: 5,
     },
     {
       doctorId: 4,
@@ -29,9 +30,10 @@ module.exports = {
       startHour: '10:00',
       endHour: '16:00',
       frequency: 30,
-      validUntil: new Date(2022, 9, 1),
+      validUntil: new Date(2022, 11, 1),
       createdAt: new Date(),
       updatedAt: new Date(),
+      extraAppts: 5,
     },
     {
       doctorId: 4,
@@ -40,9 +42,10 @@ module.exports = {
       startHour: '10:00',
       endHour: '16:00',
       frequency: 15,
-      validUntil: new Date(2022, 10, 1),
+      validUntil: new Date(2022, 11, 1),
       createdAt: new Date(),
       updatedAt: new Date(),
+      extraAppts: 5,
     }], {});
   },
 

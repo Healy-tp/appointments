@@ -84,6 +84,9 @@ Availability.init({
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
+  extraAppts: {
+    type: DataTypes.INTEGER,
+  },
 }, {
   sequelize,
   tableName: 'availabilities',

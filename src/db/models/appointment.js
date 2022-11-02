@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require('sequelize');
-const { MAX_APPOINTMENT_UPDATES } = require('../../utils/constants');
+const { MAX_APPOINTMENT_UPDATES, APPOINTMENT_STATUS } = require('../../utils/constants');
 const { sequelize } = require('../dbsetup');
-const { Doctor } = require('./doctor');
+const { Availability } = require('./availability');
 
 class Appointment extends Model {
   /*
@@ -38,13 +38,46 @@ Appointment.init({
   userId: DataTypes.INTEGER,
   officeId: DataTypes.INTEGER,
   arrivalTime: DataTypes.DATE,
-  status: DataTypes.STRING,
+  status: {
+    type: DataTypes.STRING,
+    validate: {
+      isIn: [[
+        APPOINTMENT_STATUS.ATTENDED,
+        APPOINTMENT_STATUS.CANCELLED,
+        APPOINTMENT_STATUS.CONFIRMED,
+        APPOINTMENT_STATUS.TO_CONFIRM,
+      ]],
+    },
+  },
   timesModifiedByUser: {
     type: DataTypes.INTEGER,
     validate: {
       max: MAX_APPOINTMENT_UPDATES,
     },
     defaultValue: 0,
+  },
+  extraAppt: {
+    type: DataTypes.DATEONLY,
+    validate: {
+      async spotsAvailable(value) {
+        const av = await Availability.findOne({
+          where: {
+            doctorId: this.doctorId,
+            weekday: new Date(value).getDay(),
+          },
+        });
+        const appts = await Appointment.findAll({
+          where: {
+            extraAppt: value,
+            doctorId: this.doctorId,
+          },
+        });
+
+        if (appts.length >= av.extraAppts) {
+          throw new Error('No more extra spots available for selected date');
+        }
+      },
+    },
   },
 }, {
   sequelize,
