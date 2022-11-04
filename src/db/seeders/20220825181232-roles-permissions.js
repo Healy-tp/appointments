@@ -14,18 +14,18 @@ module.exports = {
     await queryInterface.bulkInsert('rolesPermissions', [
       {
         roleId: 1, // Users
-        permissions: 'EDIT_USERS',
+        permissions: 'GET_APPTS|EDIT_APPTS|DELETE_APPTS|CREATE_APPT|START_CHAT',
         createdAt: new Date(),
         updatedAt: new Date(),
       }, {
         roleId: 2, // Doctors
-        permissions: 'EDIT_DOCTORS',
+        permissions: 'GET_OFFICES|GET_AVAILABILITY_BY_DOC_ID|CREATE_AVAILABILITY|GET_APPTS|EDIT_APPTS|START_CHAT',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         roleId: 3, // Admin
-        permissions: 'EDIT_USERS|EDIT_DOCTORS',
+        permissions: 'GET_OFFICES|CREATE_AVAILABILITY|GET_APPTS|EDIT_APPTS|CREATE_APPT|CREATE_OFFICE|EDIT_AVAILABILITY|EDIT_OFFICE',
         createdAt: new Date(),
         updatedAt: new Date(),
       }], {});

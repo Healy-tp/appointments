@@ -10,25 +10,13 @@ const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 // TODO: Improve error handling
 
 router.get('/all', getAllAppointments);
-router.get('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], getAppointmentById);
-router.get('/', [currentUser], getAppointmentsByUserId);
-router.put('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], updateAppointment);
-router.delete('/:id', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], deleteAppointment);
-router.post('/', [currentUser, hasPermissions('EDIT_USERS', RolesPermissions)], createAppointment);
-router.post('/:id/start-chat', [currentUser], startChat);
+router.get('/', [currentUser, hasPermissions('GET_APPTS', RolesPermissions)], getAppointmentsByUserId);
+router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)], updateAppointment);
+router.delete('/:id', [currentUser, hasPermissions('DELETE_APPTS', RolesPermissions)], deleteAppointment);
+router.post('/', [currentUser, hasPermissions('CREATE_APPT', RolesPermissions)], createAppointment);
+router.post('/:id/start-chat', [currentUser, hasPermissions('START_CHAT', RolesPermissions)], startChat);
 
 module.exports = router;
-
-async function getAppointmentById(req, res, next) {
-  try {
-    const apptId = _.get(req, 'params.id');
-    const response = await apptController.getAppointmentById(apptId);
-    res.status(200).send(response);
-  } catch (err) {
-    logger.error(err.message);
-    next(err);
-  }
-}
 
 async function getAppointmentsByUserId(req, res, next) {
   try {

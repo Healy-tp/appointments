@@ -3,14 +3,15 @@ const _ = require('lodash');
 
 const logger = require('../../../logger');
 const availabilityController = require('../../../controllers/availability');
-const { currentUser } = require('@healy-tp/common');
+const { currentUser, hasPermissions } = require('@healy-tp/common');
+const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 /* ****** route definitions ****** */
 
 // Add isAdmin middleware check to createAvailability
-router.post('/', currentUser, createAvailability);
+router.post('/', [currentUser, hasPermissions('CREATE_AVAILABILITY', RolesPermissions)], createAvailability);
 router.get('/all', getAllRecords);
-router.get('/', currentUser, getAvailabilityByDoctorId);
+router.get('/', [currentUser, hasPermissions('GET_AVAILABILITY_BY_DOC_ID', RolesPermissions)], getAvailabilityByDoctorId);
 
 module.exports = router;
 

@@ -14,7 +14,6 @@ const { APPOINTMENT_STATUS } = require('../utils/constants');
 const self = {
   createAppointment,
   editAppointment,
-  getAppointmentById,
   getAppointmentsByUserId,
   updateAppointment,
   deleteAppointment,
@@ -24,14 +23,6 @@ const self = {
 };
 
 module.exports = self;
-
-async function getAppointmentById(id) {
-  const appointment = await Appointment.findByPk(id);
-  if (!appointment) {
-    throw new Error(`Appointment ${id} not found.`);
-  }
-  return appointment;
-}
 
 async function getAppointmentsByUserId(userId, isDoctor) {
   const where = isDoctor ? { doctorId: userId} : { userId };
