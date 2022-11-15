@@ -15,6 +15,9 @@ router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)]
 router.delete('/:id', [currentUser, hasPermissions('DELETE_APPTS', RolesPermissions)], deleteAppointment);
 router.post('/', [currentUser, hasPermissions('CREATE_APPT', RolesPermissions)], createAppointment);
 router.post('/:id/start-chat', [currentUser, hasPermissions('START_CHAT', RolesPermissions)], startChat);
+router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)],doctorAppointmentCancelation);
+router.post('/:id/confirm-appt', userConfirmAppointment);
+router.post('/doctor-day-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorDayCancelation);
 
 module.exports = router;
 
@@ -34,21 +37,14 @@ async function updateAppointment(req, res, next) {
     const apptId = _.get(req, 'params.id');
     const { arrivalTime, doctorId, officeId } = req.body;
 
-    // TODO: Add something to check if is doctor
-    // const isDoctor = _.get(req, 'currentUser.isDoctor', false)
-    const isDoctor = false;
-
     if (!apptId) {
       return res.status(422).send({ message: 'You are missing required fields.' });
     }
 
-    console.log('APPT ID::', apptId);
-
-    const response = await apptController.updateAppointment(apptId, isDoctor, {
+    const response = await apptController.userUpdateAppointment(apptId, {
       arrivalTime,
       doctorId,
       officeId,
-      // status,
     });
     res.status(200).send(response);
   } catch (err) {
@@ -106,6 +102,39 @@ async function startChat(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
     const response = await apptController.startChat(apptId);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function doctorAppointmentCancelation(req, res, next) {
+  try {
+    const apptId = _.get(req, 'params.id');
+    const response = await apptController.doctorAppointmentCancelation(apptId);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function doctorDayCancelation(req, res, next) {
+  try {
+    const { day } = req.body;
+    const response = await apptController.doctorDayCancelation(4, day);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function userConfirmAppointment(req, res, next) {
+  try {
+    const apptId = _.get(req, 'params.id');
+    const response = await apptController.userConfirmAppointment(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

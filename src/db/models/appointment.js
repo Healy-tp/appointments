@@ -24,6 +24,15 @@ class Appointment extends Model {
   getFullname() {
     return [this.firstName, this.lastName].join(' ');
   }
+
+  static async getAllAppointmentsForDoctor(doctorId) {
+    const appointments = await this.findAll({
+      where: {
+        doctorId,
+      },
+    });
+    return appointments;
+  }
 }
 
 Appointment.init({
