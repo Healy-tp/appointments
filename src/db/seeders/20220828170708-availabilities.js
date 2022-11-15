@@ -37,7 +37,7 @@ module.exports = {
     },
     {
       doctorId: 4,
-      officeId: 2,
+      officeId: 1,
       weekday: 5,
       startHour: '10:00',
       endHour: '16:00',

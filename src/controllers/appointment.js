@@ -15,11 +15,14 @@ const self = {
   createAppointment,
   editAppointment,
   getAppointmentsByUserId,
-  updateAppointment,
+  userUpdateAppointment,
   deleteAppointment,
   getAllAppointments,
   startChat,
   getAppointmentsInInterval,
+  doctorAppointmentCancelation,
+  doctorDayCancelation,
+  userConfirmAppointment,
 };
 
 module.exports = self;
@@ -108,7 +111,7 @@ async function createAppointment({
   });
 }
 
-async function updateAppointment(id, isDoctor, updates) {
+async function userUpdateAppointment(id, updates) {
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -120,12 +123,6 @@ async function updateAppointment(id, isDoctor, updates) {
   if (!dates.includes(arrivalTimeDt.getTime())) {
     throw new Error('No slots available for the selected doctor at that time');
   }
-
-  // if (isDoctor) {
-  //   updates.status = APPOINTMENT_STATUS.TO_CONFIRM;
-  // } else {
-  //   updates.timesModifiedByUser = literal('"timesModifiedByUser" + 1');
-  // }
 
   const existingAppt = await Appointment.findOne(filters);
   return existingAppt.update({
@@ -170,7 +167,6 @@ async function getAllAppointments(forAdmin = false) {
     include: [{ model: Doctor }, { model: User }],
   };
   const response = await Appointment.findAll(params);
-
   return response;
 }
 
@@ -188,10 +184,108 @@ async function getAppointmentsInInterval(days) {
   const appointments = await Appointment.findAll({
     attributes: ['arrivalTime', 'doctorId', 'userId'],
     where: {
+      status: APPOINTMENT_STATUS.CONFIRMED,
       arrivalTime: {
         [Op.between]: [moment().format(), moment().add(days, 'days').format()],
       },
     },
   });
   return appointments;
+}
+
+async function doctorAppointmentCancelation(apptId) {
+  const appt = await Appointment.findByPk(apptId);
+  appt.update({ status: APPOINTMENT_STATUS.CANCELLED });
+
+  const unavailableSlots = {};
+  const appointments = await Appointment.getAllAppointmentsForDoctor(appt.doctorId);
+  appointments.forEach((ap) => {
+    unavailableSlots[ap.arrivalTime.getTime()] = true;
+  });
+
+  const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(appt.doctorId);
+  let newDate;
+  availabilities.every((a) => {
+    if (!unavailableSlots[a.getTime()]) {
+      newDate = a;
+      // console.log(newDate);
+      return false;
+    }
+    return true;
+  });
+
+  sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
+    proposedTime: newDate,
+    oldTime: appt.arrivalTime,
+    userId: appt.userId,
+    doctorId: appt.doctorId,
+  });
+
+  return Appointment.create({
+    arrivalTime: newDate,
+    doctorId: appt.doctorId,
+    officeId: offices[newDate.getDay()],
+    userId: appt.userId,
+    // extraAppt: extraApptDt,
+    status: APPOINTMENT_STATUS.TO_CONFIRM,
+  });
+}
+
+async function doctorDayCancelation(doctorId, dateString) {
+  const [nUpdatedAppts, appts] = await Appointment.update({
+    status: APPOINTMENT_STATUS.CANCELLED,
+  }, {
+    where: {
+      doctorId,
+      arrivalTime: {
+        [Op.between]: [
+          new Date(dateString),
+          new Date(`${dateString} 23:59`),
+        ],
+      },
+    },
+    returning: true,
+  });
+
+  const newProposedAppts = [];
+  const unavailableSlots = {};
+  const appointments = await Appointment.getAllAppointmentsForDoctor(doctorId);
+  appointments.forEach((ap) => {
+    unavailableSlots[ap.arrivalTime.getTime()] = true;
+  });
+
+  const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(doctorId);
+  availabilities.every((a) => {
+    if (!unavailableSlots[a.getTime()] && a.toJSON().slice(0, 10) !== dateString) {
+      newProposedAppts.push(a);
+      unavailableSlots[a.getTime()] = true;
+    }
+    return newProposedAppts.length !== nUpdatedAppts;
+  });
+
+  const updateMsgs = [];
+  appts.forEach((a, idx) => {
+    Appointment.create({
+      arrivalTime: newProposedAppts[idx],
+      doctorId: a.doctorId,
+      officeId: offices[newProposedAppts[idx].getDay()],
+      userId: a.userId,
+      // extraAppt: extraApptDt,
+      status: APPOINTMENT_STATUS.TO_CONFIRM,
+    });
+    updateMsgs.push({
+      doctorId: a.doctorId,
+      userId: a.userId,
+      proposedTime: newProposedAppts[idx],
+      oldTime: a.arrivalTime,
+    });
+  });
+
+  sendMessage(queueConstants.DAY_CANCEL_BY_DOCTOR, updateMsgs);
+}
+
+async function userConfirmAppointment(apptId) {
+  return Appointment.update({
+    status: APPOINTMENT_STATUS.CONFIRMED,
+  }, { where: { id: apptId } });
 }

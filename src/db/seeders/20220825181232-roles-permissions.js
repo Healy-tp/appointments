@@ -19,7 +19,7 @@ module.exports = {
         updatedAt: new Date(),
       }, {
         roleId: 2, // Doctors
-        permissions: 'GET_OFFICES|GET_AVAILABILITY_BY_DOC_ID|CREATE_AVAILABILITY|GET_APPTS|EDIT_APPTS|START_CHAT',
+        permissions: 'GET_OFFICES|GET_AVAILABILITY_BY_DOC_ID|CREATE_AVAILABILITY|GET_APPTS|EDIT_APPTS|START_CHAT|DOCTOR_CANCELATION',
         createdAt: new Date(),
         updatedAt: new Date(),
       },

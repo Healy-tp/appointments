@@ -41,6 +41,67 @@ class Availability extends Model {
 
     return dates;
   }
+
+  static getClosestDateToWeekday(weekday) {
+    const startDate = new Date();
+    while (startDate.getDay() !== weekday) {
+      startDate.setDate(startDate.getDate() + 1);
+    }
+    return startDate;
+  }
+
+  static getSlotsBetweenTwoHours(startDtStr, av) {
+    const slots = [];
+    const startDt = new Date(`${startDtStr} ${av.startHour.slice(0, 5)}`);
+    const endDt = new Date(`${startDtStr} ${av.endHour.slice(0, 5)}`);
+
+    while (startDt < endDt) {
+      slots.push(new Date(startDt));
+      startDt.setMinutes(startDt.getMinutes() + av.frequency);
+    }
+
+    return slots;
+  }
+
+  static async getAllAvailableSlotsForDoctor(doctorId) {
+    const availabilities = await this.findAll({
+      where: {
+        doctorId,
+      },
+    });
+
+    const offices = {};
+    availabilities.forEach((a) => {
+      offices[a.weekday] = a.officeId;
+    });
+
+    const allAvailableSlotsForSpecificWeekday = [];
+    const validUntils = {};
+    availabilities.forEach((av) => {
+      const startDt = this.getClosestDateToWeekday(av.weekday);
+      const slots = this.getSlotsBetweenTwoHours(startDt.toJSON().slice(0, 10), av);
+      allAvailableSlotsForSpecificWeekday.push(...slots);
+      validUntils[av.weekday] = new Date(av.validUntil);
+    });
+
+    // console.log(allAvailableSlotsForSpecificWeekday);
+
+    const allAvailableSlots = [];
+    allAvailableSlotsForSpecificWeekday.forEach((ad) => {
+      while (ad < validUntils[ad.getDay()]) {
+        allAvailableSlots.push(new Date(ad));
+        ad.setDate(ad.getDate() + 7);
+      }
+    });
+
+    const response = allAvailableSlots.filter((a) => a > new Date());
+    // console.log(response);
+    return [response.sort((o1, o2) => {
+      if (o1 < o2) return -1;
+      else if (o2 > o1) return 1;
+      return 0;
+    }), offices];
+  }
 }
 
 Availability.init({
