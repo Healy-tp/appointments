@@ -79,6 +79,10 @@ async function createAvailability({
 }
 
 async function getByDoctorId(doctorId) {
+  if (!doctorId) {
+    throw new Error('Doctor ID is required');
+  }
+
   const filters = {
     where: {
       doctorId,
@@ -104,6 +108,10 @@ async function editAvailability({
   frequency,
   validUntil,
 }) {
+  if (!id) {
+    throw new Error('Availability ID is required');
+  }
+
   if (!frequency || !validUntil) {
     throw new Error('Cannot edit an availability without a valid frequency or valid until date');
   }

@@ -1,9 +1,9 @@
+/* eslint-disable consistent-return */
 const router = require('express').Router();
-const _ = require('lodash');
 
+const { currentUser, hasPermissions } = require('@healy-tp/common');
 const logger = require('../../../logger');
 const availabilityController = require('../../../controllers/availability');
-const { currentUser, hasPermissions } = require('@healy-tp/common');
 const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 /* ****** route definitions ****** */
