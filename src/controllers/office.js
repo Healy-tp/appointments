@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { Op } = require('sequelize');
+const { getSpecialties } = require('@healy-tp/common');
 const { Office } = require('../db/models/office');
 
 const self = {
@@ -11,8 +12,7 @@ const self = {
 module.exports = self;
 
 async function getAllOffices() {
-  const response = await Office.findAll();
-  return response;
+  return Office.findAll();
 }
 
 async function createOffice({
@@ -21,6 +21,10 @@ async function createOffice({
 }) {
   if (!officeNumber || !specialties || _.isEmpty(specialties)) {
     throw new Error('Cannot create an office without a valid office number or specialties');
+  }
+
+  if (!_.every(specialties, (sp) => _.includes(getSpecialties(), sp))) {
+    throw new Error('Cannot create an office with invalid specialties');
   }
 
   const existingOffice = await Office.findOne({
@@ -45,8 +49,16 @@ async function editOffice({
   number,
   specialties,
 }) {
+  if (!id) {
+    throw new Error('Cannot edit an office without a valid id');
+  }
+
   if (!number || !specialties || _.isEmpty(specialties)) {
     throw new Error('Cannot edit an office without a valid office number or specialties');
+  }
+
+  if (!_.every(specialties, (sp) => _.includes(getSpecialties(), sp))) {
+    throw new Error('Cannot edit an office with invalid specialties');
   }
 
   const existingOffice = await Office.findOne({
