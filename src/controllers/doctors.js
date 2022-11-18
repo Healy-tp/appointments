@@ -7,6 +7,5 @@ const self = {
 module.exports = self;
 
 async function getDoctors() {
-  const response = await Doctor.findAll();
-  return response;
+  return Doctor.findAll();
 }
