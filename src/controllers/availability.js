@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const moment = require('moment');
+const { Op } = require('sequelize');
 
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
 const { Availability } = require('../db/models/availability');
@@ -36,7 +37,6 @@ async function createAvailability({
     throw new Error('Selected availability date is already expired');
   }
 
-  // TODO: Check validUntil
   const availabilitiesInOffice = await Availability.findAll({
     where: {
       officeId,
@@ -50,10 +50,14 @@ async function createAvailability({
           [Op.between]: [startHour, endHour],
         },
       }],
+      validUntil: {
+        [Op.gte]: moment().format('YYYY-MM-DD'),
+      },
     },
   });
-  if (availabilitiesInOffice.length > 0) {
-    throw new Error('Selected hours are invalid. Office is occupied for that date in the selected hour range');
+
+  if (!_.isEmpty(availabilitiesInOffice)) {
+    throw new Error('Office is occupied for that date in the selected hour range');
   }
 
   const existingAvailability = await Availability.findOne({
@@ -63,7 +67,8 @@ async function createAvailability({
     },
     raw: true,
   });
-  if (existingAvailability) {
+
+  if (!_.isEmpty(existingAvailability)) {
     throw new Error(`Doctor ${doctorId} already has an availability on day ${weekday}`);
   }
 

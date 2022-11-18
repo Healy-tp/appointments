@@ -13,6 +13,10 @@ const fakeAvailability = {
   extraAppts: 5,
 };
 
+function createAvailability() {
+  return fakeAvailability;
+}
+
 function getAllRecords() {
   return [fakeAvailability];
 }
@@ -25,6 +29,7 @@ function getByDoctorId(doctorId) {
 }
 
 module.exports = {
+  createAvailability,
   getAllRecords,
   getByDoctorId,
 

@@ -3,14 +3,17 @@
 
 const sinon = require('sinon');
 const chai = require('chai');
+const moment = require('moment');
 
 const { expect } = chai;
 
 const { Availability } = require('../../db/models/availability');
 const outputMockData = require('../mockData/availability');
 
-const { DOCTOR_IDS, DOCTOR_ID, AVAILABILITY_ID, VALID_UNTIL_DATE } = require('./constants');
-const { FREQUENCIES } = require('../../utils/constants');
+const {
+  DOCTOR_IDS, DOCTOR_ID, AVAILABILITY_ID, VALID_UNTIL_DATE, OFFICE_ID,
+} = require('./constants');
+const { FREQUENCIES, WEEKDAYS } = require('../../utils/constants');
 
 describe('controllers/availability', () => {
   let modelStub;
@@ -140,6 +143,159 @@ describe('controllers/availability', () => {
           expect(findOneStub.calledOnce).to.be.true;
           expect(updateStub.calledOnce).to.be.true;
           expect(response).to.eql(editResponse);
+        })
+        .finally(() => {
+          findOneStub.restore();
+          updateStub.restore();
+        });
+    });
+  });
+
+  describe('createAvailability', () => {
+    it('should throw an error when weekday is bigger than saturday', async () => {
+      const input = {
+        weekday: WEEKDAYS.SATURDAY + 1,
+      };
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql(`Weekday "${WEEKDAYS.SATURDAY + 1}" is invalid`);
+        });
+    });
+
+    it('should throw an error when weekday is lower than monday', async () => {
+      const input = {
+        weekday: WEEKDAYS.MONDAY - 1,
+      };
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql(`Weekday "${WEEKDAYS.MONDAY - 1}" is invalid`);
+        });
+    });
+
+    it('should throw an error when frequency does not belong to the list of freqs', async () => {
+      const input = {
+        weekday: WEEKDAYS.MONDAY,
+        frequency: 45,
+      };
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql(`Frequency "${45} mins." is not valid`);
+        });
+    });
+
+    it('should throw an error when availability date is already expired (invalid)', async () => {
+      const input = {
+        weekday: WEEKDAYS.MONDAY,
+        frequency: FREQUENCIES[0],
+        validUntil: moment().subtract(1, 'days'),
+      };
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Selected availability date is already expired');
+        });
+    });
+
+    it('should throw an error when the office is occupied for the selected hour', async () => {
+      const input = {
+        doctorId: DOCTOR_ID,
+        officeId: OFFICE_ID,
+        weekday: WEEKDAYS.MONDAY,
+        frequency: FREQUENCIES[0],
+        startHour: '13:00:00',
+        endHour: '16:00:00',
+        validUntil: moment().add(1, 'days'),
+      };
+
+      const mockedRecords = outputMockData.createAvailability();
+      const findAllStub = sinon.stub(Availability, 'findAll').returns([mockedRecords]);
+
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(findAllStub.calledOnce).to.be.true;
+          expect(err.message).to.eql('Office is occupied for that date in the selected hour range');
+        })
+        .finally(() => {
+          findAllStub.restore();
+        });
+    });
+
+    it('should throw an error when the doctor already has an availability on that day', async () => {
+      const input = {
+        doctorId: DOCTOR_ID,
+        officeId: OFFICE_ID,
+        weekday: WEEKDAYS.MONDAY,
+        frequency: FREQUENCIES[0],
+        startHour: '13:00:00',
+        endHour: '16:00:00',
+        validUntil: moment().add(1, 'days'),
+      };
+
+      const mockedRecords = outputMockData.createAvailability();
+      const availabilitiesInOfficeStub = sinon.stub(Availability, 'findAll').returns([]);
+      const existingAvailabilityStub = sinon.stub(Availability, 'findOne').returns(mockedRecords);
+
+      await availabilityController.createAvailability(input)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(availabilitiesInOfficeStub.calledOnce).to.be.true;
+          expect(existingAvailabilityStub.calledOnce).to.be.true;
+          expect(err.message).to.eql(`Doctor ${input.doctorId} already has an availability on day ${input.weekday}`);
+        })
+        .finally(() => {
+          availabilitiesInOfficeStub.restore();
+          existingAvailabilityStub.restore();
+        });
+    });
+
+    it('should create an availability correctly', async () => {
+      const input = {
+        doctorId: DOCTOR_ID,
+        officeId: OFFICE_ID,
+        weekday: WEEKDAYS.MONDAY,
+        frequency: FREQUENCIES[0],
+        startHour: '13:00:00',
+        endHour: '16:00:00',
+        validUntil: moment().add(1, 'days'),
+      };
+
+      const mockedRecords = outputMockData.createAvailability();
+      const availabilitiesInOfficeStub = sinon.stub(Availability, 'findAll').returns([]);
+      const existingAvailabilityStub = sinon.stub(Availability, 'findOne').returns(null);
+      const createAvailabilityStub = sinon.stub(Availability, 'create').returns(mockedRecords);
+
+      await availabilityController.createAvailability(input)
+        .then((availability) => {
+          expect(availabilitiesInOfficeStub.calledOnce).to.be.true;
+          expect(existingAvailabilityStub.calledOnce).to.be.true;
+          expect(createAvailabilityStub.calledOnce).to.be.true;
+
+          expect(availability).to.have.property('id').that.is.a('number');
+          expect(availability).to.have.property('doctorId').that.is.a('number');
+          expect(availability).to.have.property('officeId').that.is.a('number');
+          expect(availability).to.have.property('weekday').that.is.a('number');
+          expect(availability).to.have.property('frequency').that.is.a('number');
+        })
+        .finally(() => {
+          availabilitiesInOfficeStub.restore();
+          existingAvailabilityStub.restore();
+          createAvailabilityStub.restore();
         });
     });
   });
