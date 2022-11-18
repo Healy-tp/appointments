@@ -65,6 +65,9 @@ Appointment.init({
     },
     defaultValue: 0,
   },
+  notes: {
+    type: DataTypes.TEXT('long'),
+  },
   extraAppt: {
     type: DataTypes.DATEONLY,
     validate: {
