@@ -23,6 +23,8 @@ const self = {
   doctorAppointmentCancelation,
   doctorDayCancelation,
   userConfirmAppointment,
+  getHistoryBetween,
+  upsertNotes,
 };
 
 module.exports = self;
@@ -288,4 +290,38 @@ async function userConfirmAppointment(apptId) {
   return Appointment.update({
     status: APPOINTMENT_STATUS.CONFIRMED,
   }, { where: { id: apptId } });
+}
+
+async function getHistoryBetween({ doctorId, userId }) {
+  const appointments = await Appointment.findAll({
+    where: {
+      userId,
+      doctorId,
+    },
+    include: [{
+      model: User,
+      attributes: ['firstName', 'lastName'],
+    }, {
+      model: Doctor,
+      attributes: ['firstName', 'lastName', 'specialty'],
+    }],
+    order: [
+      ['arrivalTime', 'ASC'],
+    ],
+  });
+
+  return appointments;
+}
+
+async function upsertNotes(apptId, payload) {
+  await Appointment.update(
+    {
+      notes: payload.text,
+    },
+    {
+      where: {
+        id: apptId,
+      },
+    },
+  );
 }

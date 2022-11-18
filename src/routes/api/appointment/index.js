@@ -11,11 +11,16 @@ const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 router.get('/all', getAllAppointments);
 router.get('/', [currentUser, hasPermissions('GET_APPTS', RolesPermissions)], getAppointmentsByUserId);
+router.get('/history-with-user/:id', [currentUser, hasPermissions('GET_HISTORY', RolesPermissions)], getHistory);
+
 router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)], updateAppointment);
+
 router.delete('/:id', [currentUser, hasPermissions('DELETE_APPTS', RolesPermissions)], deleteAppointment);
+
 router.post('/', [currentUser, hasPermissions('CREATE_APPT', RolesPermissions)], createAppointment);
 router.post('/:id/start-chat', [currentUser, hasPermissions('START_CHAT', RolesPermissions)], startChat);
-router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)],doctorAppointmentCancelation);
+router.post('/:id/upsert-notes', [currentUser, hasPermissions('EDIT_NOTES', RolesPermissions)], upsertNotes);
+router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorAppointmentCancelation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
 router.post('/doctor-day-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorDayCancelation);
 
@@ -135,6 +140,33 @@ async function userConfirmAppointment(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
     const response = await apptController.userConfirmAppointment(apptId);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function getHistory(req, res, next) {
+  try {
+    const requestorId = req.currentUser.id;
+    const counterpartId = _.get(req, 'params.id');
+    const params = {
+      doctorId: req.currentUser.roleId === 2 ? requestorId : counterpartId,
+      userId: req.currentUser.roleId === 2 ? counterpartId : requestorId,
+    };
+    const response = await apptController.getHistoryBetween(params);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function upsertNotes(req, res, next) {
+  try {
+    const apptId = _.get(req, 'params.id');
+    const response = await apptController.upsertNotes(apptId, req.body);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

@@ -57,6 +57,9 @@ module.exports = {
       extraAppt: {
         type: Sequelize.DATEONLY,
       },
+      notes: {
+        type: Sequelize.TEXT('long'),
+      },
     });
   },
   async down(queryInterface) {
