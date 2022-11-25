@@ -30,7 +30,11 @@ const self = {
 module.exports = self;
 
 async function getAppointmentsByUserId(userId, isDoctor) {
-  const where = isDoctor ? { doctorId: userId} : { userId };
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
+  const where = isDoctor ? { doctorId: userId } : { userId };
   const filters = {
     where,
     attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
@@ -40,8 +44,7 @@ async function getAppointmentsByUserId(userId, isDoctor) {
     },
     {
       model: User,
-    },
-    ],
+    }],
   };
   return Appointment.findAll(filters);
 }
@@ -114,6 +117,10 @@ async function createAppointment({
 }
 
 async function userUpdateAppointment(id, updates) {
+  if (!id) {
+    throw new Error('Appointment ID is required');
+  }
+
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -127,16 +134,24 @@ async function userUpdateAppointment(id, updates) {
   }
 
   const existingAppt = await Appointment.findOne(filters);
-  return existingAppt.update({
+  if (!existingAppt) {
+    throw new Error(`Appointment "${id}" not found.`);
+  }
+
+  return Appointment.update({
     ...updates,
     timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
-  });
+  }, filters);
 }
 
 async function editAppointment({
   id,
   status,
 }) {
+  if (!id) {
+    throw new Error('Appointment ID is required');
+  }
+
   if (!status || !_.includes(_.values(APPOINTMENT_STATUS), status)) {
     throw new Error('Cannot edit an appointment without a valid status');
   }
@@ -159,6 +174,10 @@ async function editAppointment({
 }
 
 async function deleteAppointment(id) {
+  if (!id) {
+    throw new Error('Appointment ID is required');
+  }
+
   await Appointment.destroy({ where: { id } });
 }
 
@@ -287,9 +306,15 @@ async function doctorDayCancelation(doctorId, dateString) {
 }
 
 async function userConfirmAppointment(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   return Appointment.update({
     status: APPOINTMENT_STATUS.CONFIRMED,
-  }, { where: { id: apptId } });
+  }, {
+    where: { id: apptId },
+  });
 }
 
 async function getHistoryBetween({ doctorId, userId }) {
@@ -314,6 +339,14 @@ async function getHistoryBetween({ doctorId, userId }) {
 }
 
 async function upsertNotes(apptId, payload) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
+  if (!payload.notes) {
+    throw new Error('You must provide notes');
+  }
+
   await Appointment.update(
     {
       notes: payload.text,
