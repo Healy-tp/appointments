@@ -91,6 +91,9 @@ Appointment.init({
       },
     },
   },
+  assisted: {
+    type: DataTypes.BOOLEAN,
+  },
 }, {
   sequelize,
   tableName: 'appointments',

@@ -12,6 +12,7 @@ const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 router.get('/all', getAllAppointments);
 router.get('/', [currentUser, hasPermissions('GET_APPTS', RolesPermissions)], getAppointmentsByUserId);
 router.get('/history-with-user/:id', [currentUser, hasPermissions('GET_HISTORY', RolesPermissions)], getHistory);
+router.get('/mark-assisted/:id', markApptAssisted);
 
 router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)], updateAppointment);
 
@@ -167,6 +168,17 @@ async function upsertNotes(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
     const response = await apptController.upsertNotes(apptId, req.body);
+    res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function markApptAssisted(req, res, next) {
+  try {
+    const apptId = _.get(req, 'params.id');
+    const response = await apptController.markApptAssisted(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
