@@ -25,6 +25,7 @@ const self = {
   userConfirmAppointment,
   getHistoryBetween,
   upsertNotes,
+  markApptAssisted,
 };
 
 module.exports = self;
@@ -350,6 +351,19 @@ async function upsertNotes(apptId, payload) {
   await Appointment.update(
     {
       notes: payload.text,
+    },
+    {
+      where: {
+        id: apptId,
+      },
+    },
+  );
+}
+
+async function markApptAssisted(apptId) {
+  await Appointment.update(
+    {
+      assisted: true,
     },
     {
       where: {

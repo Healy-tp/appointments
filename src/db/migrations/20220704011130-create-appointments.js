@@ -60,6 +60,9 @@ module.exports = {
       notes: {
         type: Sequelize.TEXT('long'),
       },
+      assisted: {
+        type: Sequelize.BOOLEAN,
+      },
     });
   },
   async down(queryInterface) {
