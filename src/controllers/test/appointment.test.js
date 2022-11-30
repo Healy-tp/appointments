@@ -12,7 +12,7 @@ const outputMockData = require('../mockData/appointment');
 const { APPOINTMENT_STATUS } = require('../../utils/constants');
 
 const {
-  USER_ID, USER_IDS, APPOINTMENT_ID, DOCTOR_ID
+  USER_ID, USER_IDS, APPOINTMENT_ID, DOCTOR_ID,
 } = require('./constants');
 
 describe('controllers/appointment', () => {
@@ -60,6 +60,160 @@ describe('controllers/appointment', () => {
         })
         .finally(() => {
           findAllStub.restore();
+        });
+    });
+  });
+
+  describe('createAppointment', () => {
+    const pastArrivalTime = '2020-01-01T00:00:00.000Z';
+    const validArrivalTime = '2023-01-01T00:00:00.000Z';
+
+    it('should throw an error when no arrival time is sent', async () => {
+      await appointmentController.createAppointment({})
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Missing required fields');
+        });
+    });
+
+    it('should throw an error when no doctor id is sent', async () => {
+      await appointmentController.createAppointment({
+        arrivalTime: validArrivalTime,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Missing required fields');
+        });
+    });
+
+    it('should throw an error when no user id is sent', async () => {
+      await appointmentController.createAppointment({
+        arrivalTime: validArrivalTime,
+        doctorId: DOCTOR_ID,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Missing required fields');
+        });
+    });
+
+    it('should throw an error when arrival time is at a past time', async () => {
+      await appointmentController.createAppointment({
+        arrivalTime: pastArrivalTime,
+        doctorId: DOCTOR_ID,
+        userId: USER_ID,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Cannot create an appointment at a past time');
+        });
+    });
+
+    it('should throw an error when there is an existing appointment at that time', async () => {
+      const appointmentStub = sinon.stub(Appointment, 'findOne').returns(outputMockData.fakeAppointment);
+
+      await appointmentController.createAppointment({
+        arrivalTime: validArrivalTime,
+        doctorId: DOCTOR_ID,
+        userId: USER_ID,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(appointmentStub.calledOnce).to.be.true;
+          expect(err.message).to.eql('Cannot create an appointment at that time!');
+        })
+        .finally(() => {
+          appointmentStub.restore();
+        });
+    });
+
+    it('should throw an error when there is an existing appointment on different time but same day', async () => {
+      const appointmentStub = sinon.stub(Appointment, 'findOne');
+      // First call returns null -> existing appt on arrival time provided
+      appointmentStub.onCall(0).returns(null);
+      // Second call returns an appointment -> same day as another appt
+      appointmentStub.onCall(1).returns(outputMockData.fakeAppointment);
+
+      await appointmentController.createAppointment({
+        arrivalTime: new Date(),
+        doctorId: DOCTOR_ID,
+        userId: USER_ID,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(appointmentStub.calledTwice).to.be.true;
+          expect(err.message).to.eql('You already have an appointment for that day');
+        })
+        .finally(() => {
+          appointmentStub.restore();
+        });
+    });
+
+    it('should throw an error when there are not slots for the doctor selected at that time', async () => {
+      const availabilityStub = sinon.stub(Availability, 'getAllSlots').returns([]);
+      const appointmentStub = sinon.stub(Appointment, 'findOne');
+      appointmentStub.onCall(0).returns(null);
+      appointmentStub.onCall(1).returns(null);
+
+      await appointmentController.createAppointment({
+        arrivalTime: validArrivalTime,
+        doctorId: DOCTOR_ID,
+        userId: USER_ID,
+      })
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(availabilityStub.calledOnce).to.be.true;
+          expect(appointmentStub.calledTwice).to.be.true;
+          expect(err.message).to.eql('No slots available for the selected doctor at that time');
+        })
+        .finally(() => {
+          appointmentStub.restore();
+          availabilityStub.restore();
+        });
+    });
+
+    it('should create an appointment correctly', async () => {
+      const validArribalTimeSlot = new Date(validArrivalTime).getTime();
+      const availabilityStub = sinon.stub(Availability, 'getAllSlots').returns([validArribalTimeSlot]);
+      const appointmentStub = sinon.stub(Appointment, 'findOne');
+      const createStub = sinon.stub(Appointment, 'create').returns(outputMockData.fakeAppointment);
+      appointmentStub.onCall(0).returns(null);
+      appointmentStub.onCall(1).returns(null);
+
+      await appointmentController.createAppointment({
+        arrivalTime: validArrivalTime,
+        doctorId: DOCTOR_ID,
+        userId: USER_ID,
+      })
+        .then((appt) => {
+          expect(availabilityStub.calledOnce).to.be.true;
+          expect(appointmentStub.calledTwice).to.be.true;
+          expect(createStub.calledOnce).to.be.true;
+
+          expect(appt).to.have.property('id').that.is.a('number');
+          expect(appt).to.have.property('doctorId').that.is.a('number');
+          expect(appt).to.have.property('officeId').that.is.a('number');
+          expect(appt).to.have.property('status').that.is.a('string');
+          expect(appt).to.have.property('arrivalTime').that.is.a('string');
+        })
+        .finally(() => {
+          appointmentStub.restore();
+          availabilityStub.restore();
+          createStub.restore();
         });
     });
   });

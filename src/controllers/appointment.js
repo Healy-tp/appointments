@@ -57,6 +57,10 @@ async function createAppointment({
   userId,
   isExtraAppt,
 }, isAdmin) {
+  if (!arrivalTime || !doctorId || !userId) {
+    throw new Error('Missing required fields');
+  }
+
   let extraApptDt = null;
   const extraAppt = isExtraAppt && isAdmin;
   if (!extraAppt) {
