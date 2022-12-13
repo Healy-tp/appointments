@@ -12,7 +12,7 @@ const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 router.get('/all', getAllAppointments);
 router.get('/', [currentUser, hasPermissions('GET_APPTS', RolesPermissions)], getAppointmentsByUserId);
 router.get('/history-with-user/:id', [currentUser, hasPermissions('GET_HISTORY', RolesPermissions)], getHistory);
-router.get('/mark-assisted/:id', markApptAssisted);
+router.get('/mark-assisted/:id', markAssisted);
 
 router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)], updateAppointment);
 
@@ -21,7 +21,7 @@ router.delete('/:id', [currentUser, hasPermissions('DELETE_APPTS', RolesPermissi
 router.post('/', [currentUser, hasPermissions('CREATE_APPT', RolesPermissions)], createAppointment);
 router.post('/:id/start-chat', [currentUser, hasPermissions('START_CHAT', RolesPermissions)], startChat);
 router.post('/:id/upsert-notes', [currentUser, hasPermissions('EDIT_NOTES', RolesPermissions)], upsertNotes);
-router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorAppointmentCancelation);
+router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorAppointmentCancellation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
 router.post('/doctor-day-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorDayCancelation);
 
@@ -115,10 +115,10 @@ async function startChat(req, res, next) {
   }
 }
 
-async function doctorAppointmentCancelation(req, res, next) {
+async function doctorAppointmentCancellation(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const response = await apptController.doctorAppointmentCancelation(apptId);
+    const response = await apptController.doctorAppointmentCancellation(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -175,10 +175,10 @@ async function upsertNotes(req, res, next) {
   }
 }
 
-async function markApptAssisted(req, res, next) {
+async function markAssisted(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const response = await apptController.markApptAssisted(apptId);
+    const response = await apptController.markAssisted(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

@@ -7,6 +7,7 @@ const fakeAppointment = {
   id: APPOINTMENT_ID,
   doctorId: DOCTOR_ID,
   officeId: OFFICE_ID,
+  userId: USER_ID,
   status: APPOINTMENT_STATUS.CONFIRMED,
   arrivalTime: '2022-11-29T14:00:00.000Z',
   timesModifiedByUser: 0,

@@ -20,12 +20,12 @@ const self = {
   getAllAppointments,
   startChat,
   getAppointmentsInInterval,
-  doctorAppointmentCancelation,
+  doctorAppointmentCancellation,
   doctorDayCancelation,
   userConfirmAppointment,
   getHistoryBetween,
   upsertNotes,
-  markApptAssisted,
+  markAssisted,
 };
 
 module.exports = self;
@@ -186,8 +186,8 @@ async function deleteAppointment(id) {
   await Appointment.destroy({ where: { id } });
 }
 
-async function getAllAppointments(forAdmin = false) {
-  const params = !forAdmin ? {
+async function getAllAppointments(isAdmin = false) {
+  const params = !isAdmin ? {
     attributes: ['doctorId', 'arrivalTime'],
   } : {
     include: [{ model: Doctor }, { model: User }],
@@ -197,7 +197,15 @@ async function getAllAppointments(forAdmin = false) {
 }
 
 async function startChat(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   const appt = await Appointment.findOne({ where: { id: apptId } });
+  if (!appt) {
+    throw new Error(`Appointment "${apptId}" not found.`);
+  }
+
   sendMessage(queueConstants.CHAT_STARTED_EVENT, {
     appointmentId: appt.id,
     userId: appt.userId,
@@ -219,7 +227,7 @@ async function getAppointmentsInInterval(days) {
   return appointments;
 }
 
-async function doctorAppointmentCancelation(apptId) {
+async function doctorAppointmentCancellation(apptId) {
   const appt = await Appointment.findByPk(apptId);
   appt.update({ status: APPOINTMENT_STATUS.CANCELLED });
 
@@ -364,7 +372,11 @@ async function upsertNotes(apptId, payload) {
   );
 }
 
-async function markApptAssisted(apptId) {
+async function markAssisted(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   await Appointment.update(
     {
       assisted: true,

@@ -8,6 +8,9 @@ const { expect } = chai;
 
 const { Appointment } = require('../../db/models/appointment');
 const { Availability } = require('../../db/models/availability');
+const { Doctor } = require('../../db/models/doctor');
+const { User } = require('../../db/models/user');
+
 const outputMockData = require('../mockData/appointment');
 const { APPOINTMENT_STATUS } = require('../../utils/constants');
 
@@ -21,47 +24,6 @@ describe('controllers/appointment', () => {
   before(() => {
     // import file to test
     appointmentController = require('../appointment');
-  });
-
-  describe('getAppointmentsByUserId', () => {
-    it('should throw an error when no user ID provided', async () => {
-      await appointmentController.getAppointmentsByUserId()
-        .then(() => {
-          expect('this should not have been called').to.be.false;
-        })
-        .catch((err) => {
-          expect(err.message).to.eql('User ID is required');
-        });
-    });
-
-    it('should return an empty list when user doesnt have an availability', async () => {
-      const mockedRecords = outputMockData.getAppointmentsByUserId(USER_IDS[5]);
-      const findAllStub = sinon.stub(Appointment, 'findAll').returns(mockedRecords);
-
-      await appointmentController.getAppointmentsByUserId(USER_ID, false)
-        .then((appointments) => {
-          expect(findAllStub.calledOnce).to.be.true;
-          expect(appointments).to.be.an('array').that.is.empty;
-        })
-        .finally(() => {
-          findAllStub.restore();
-        });
-    });
-
-    it('should return the appointments', async () => {
-      const mockedRecords = outputMockData.getAppointmentsByUserId(USER_ID);
-      const findAllStub = sinon.stub(Appointment, 'findAll').returns(mockedRecords);
-
-      await appointmentController.getAppointmentsByUserId(USER_ID, false)
-        .then((appointments) => {
-          expect(findAllStub.calledOnce).to.be.true;
-          expect(appointments).to.equal(mockedRecords);
-          expect(appointments).to.have.lengthOf(1);
-        })
-        .finally(() => {
-          findAllStub.restore();
-        });
-    });
   });
 
   describe('createAppointment', () => {
@@ -218,6 +180,47 @@ describe('controllers/appointment', () => {
     });
   });
 
+  describe('getAppointmentsByUserId', () => {
+    it('should throw an error when no user ID provided', async () => {
+      await appointmentController.getAppointmentsByUserId()
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('User ID is required');
+        });
+    });
+
+    it('should return an empty list when user doesnt have an availability', async () => {
+      const mockedRecords = outputMockData.getAppointmentsByUserId(USER_IDS[5]);
+      const findAllStub = sinon.stub(Appointment, 'findAll').returns(mockedRecords);
+
+      await appointmentController.getAppointmentsByUserId(USER_ID, false)
+        .then((appointments) => {
+          expect(findAllStub.calledOnce).to.be.true;
+          expect(appointments).to.be.an('array').that.is.empty;
+        })
+        .finally(() => {
+          findAllStub.restore();
+        });
+    });
+
+    it('should return the appointments', async () => {
+      const mockedRecords = outputMockData.getAppointmentsByUserId(USER_ID);
+      const findAllStub = sinon.stub(Appointment, 'findAll').returns(mockedRecords);
+
+      await appointmentController.getAppointmentsByUserId(USER_ID, false)
+        .then((appointments) => {
+          expect(findAllStub.calledOnce).to.be.true;
+          expect(appointments).to.equal(mockedRecords);
+          expect(appointments).to.have.lengthOf(1);
+        })
+        .finally(() => {
+          findAllStub.restore();
+        });
+    });
+  });
+
   describe('userUpdateAppointment', () => {
     const pastArrivalTime = '2020-01-01T00:00:00.000Z';
     const validArrivalTime = '2023-01-01T00:00:00.000Z';
@@ -353,7 +356,7 @@ describe('controllers/appointment', () => {
         });
     });
 
-    it('should throw an error when status is provided but is not valid', async () => {
+    it('should throw an error when appointment is valid but not found', async () => {
       const findOneStub = sinon.stub(Appointment, 'findOne').returns(null);
       await appointmentController.editAppointment({
         id: APPOINTMENT_ID,
@@ -414,6 +417,64 @@ describe('controllers/appointment', () => {
     });
   });
 
+  describe('getAllAppointments', () => {
+    const notAdminParams = { attributes: ['doctorId', 'arrivalTime'] };
+    const adminParams = { include: [{ model: Doctor }, { model: User }] };
+
+    it('should get all appointments without Doctor and User model', async () => {
+      const findAllStub = sinon.stub(Appointment, 'findAll').returns([outputMockData.fakeAppointment]);
+      await appointmentController.getAllAppointments(false)
+        .then(() => {
+          expect(findAllStub.calledOnce).to.be.true;
+          expect(findAllStub.calledWith(notAdminParams)).to.be.true;
+        })
+        .finally(() => {
+          findAllStub.restore();
+        });
+    });
+
+    it('should get all appointments with Doctor and User model', async () => {
+      const findAllStub = sinon.stub(Appointment, 'findAll').returns([outputMockData.fakeAppointment]);
+      await appointmentController.getAllAppointments(true)
+        .then(() => {
+          expect(findAllStub.calledOnce).to.be.true;
+          expect(findAllStub.calledWith(adminParams)).to.be.true;
+        })
+        .finally(() => {
+          findAllStub.restore();
+        });
+    });
+  });
+
+  describe('startChat', () => {
+    it('should throw an error when no appointment ID provided', async () => {
+      await appointmentController.startChat()
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Appointment ID is required');
+        });
+    });
+
+    it('should throw an error when the appointment requested was not found', async () => {
+      const findOneStub = sinon.stub(Appointment, 'findOne').returns(null);
+      await appointmentController.startChat(APPOINTMENT_ID)
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(findOneStub.calledOnce).to.be.true;
+          expect(err.message).to.eql(`Appointment "${APPOINTMENT_ID}" not found.`);
+        })
+        .finally(() => {
+          findOneStub.restore();
+        });
+    });
+
+    // TODO: Add startChat happy path test. We need to mock rabbitMQ queue properly
+  });
+
   describe('userConfirmAppointment', () => {
     it('should throw an error when no appointment ID provided', async () => {
       await appointmentController.userConfirmAppointment()
@@ -425,7 +486,7 @@ describe('controllers/appointment', () => {
         });
     });
 
-    it('should throw an error when no appointment ID provided', async () => {
+    it('should confirm the appointment correctly', async () => {
       const updateResponse = 'Appointment updated successfully';
       const updateStub = sinon.stub(Appointment, 'update').returns(updateResponse);
       await appointmentController.userConfirmAppointment(APPOINTMENT_ID)
@@ -483,6 +544,31 @@ describe('controllers/appointment', () => {
       await appointmentController.upsertNotes(APPOINTMENT_ID, { notes: 'some notes' })
         .then(() => {
           expect(updateStub.calledOnce).to.be.true;
+        })
+        .finally(() => {
+          updateStub.restore();
+        });
+    });
+  });
+
+  describe('markAssisted', () => {
+    it('should throw an error when no appointment ID provided', async () => {
+      await appointmentController.markAssisted()
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Appointment ID is required');
+        });
+    });
+
+    it('should mark the appointment assisted correctly', async () => {
+      const updateParams = { assisted: true };
+      const updateStub = sinon.stub(Appointment, 'update');
+      await appointmentController.markAssisted(APPOINTMENT_ID)
+        .then(() => {
+          expect(updateStub.calledOnce).to.be.true;
+          expect(updateStub.calledWith(updateParams)).to.be.true;
         })
         .finally(() => {
           updateStub.restore();
