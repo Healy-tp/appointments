@@ -28,7 +28,7 @@ describe('controllers/appointment', () => {
 
   describe('createAppointment', () => {
     const pastArrivalTime = '2020-01-01T00:00:00.000Z';
-    const validArrivalTime = '2023-01-01T00:00:00.000Z';
+    const validArrivalTime = '2030-01-01T00:00:00.000Z';
 
     it('should throw an error when no arrival time is sent', async () => {
       await appointmentController.createAppointment({})
@@ -223,7 +223,7 @@ describe('controllers/appointment', () => {
 
   describe('userUpdateAppointment', () => {
     const pastArrivalTime = '2020-01-01T00:00:00.000Z';
-    const validArrivalTime = '2023-01-01T00:00:00.000Z';
+    const validArrivalTime = '2030-01-01T00:00:00.000Z';
 
     it('should throw an error when no appt ID provided', async () => {
       await appointmentController.userUpdateAppointment()
@@ -473,6 +473,18 @@ describe('controllers/appointment', () => {
     });
 
     // TODO: Add startChat happy path test. We need to mock rabbitMQ queue properly
+  });
+
+  describe('doctorDayCancelation', () => {
+    it('should throw an error when no doctor ID provided', async () => {
+      await appointmentController.doctorDayCancelation()
+        .then(() => {
+          expect('this should not have been called').to.be.false;
+        })
+        .catch((err) => {
+          expect(err.message).to.eql('Doctor ID is required');
+        });
+    });
   });
 
   describe('userConfirmAppointment', () => {

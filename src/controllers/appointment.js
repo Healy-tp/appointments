@@ -266,7 +266,11 @@ async function doctorAppointmentCancellation(apptId) {
 }
 
 async function doctorDayCancelation(doctorId, dateString) {
-  const [nUpdatedAppts, appts] = await Appointment.update({
+  if (!doctorId) {
+    throw new Error('Doctor ID is required');
+  }
+
+  const [updatedApptsCount, appts] = await Appointment.update({
     status: APPOINTMENT_STATUS.CANCELLED,
   }, {
     where: {
@@ -294,7 +298,7 @@ async function doctorDayCancelation(doctorId, dateString) {
       newProposedAppts.push(a);
       unavailableSlots[a.getTime()] = true;
     }
-    return newProposedAppts.length !== nUpdatedAppts;
+    return newProposedAppts.length !== updatedApptsCount;
   });
 
   const updateMsgs = [];
