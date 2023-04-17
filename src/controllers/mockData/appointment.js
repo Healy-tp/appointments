@@ -1,7 +1,5 @@
 const { APPOINTMENT_STATUS } = require("../../utils/constants");
 
-
-
 const fakeAppt1 = {
   id: 1,
   arrivalTime: '2022-12-18T12:00:00.000Z', 

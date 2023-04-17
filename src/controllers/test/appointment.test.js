@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable global-require */
 
+
 const sinon = require('sinon');
 const chai = require('chai');
 
@@ -165,6 +166,7 @@ describe('controllers/appointment', () => {
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toJSON();
       const updates = { arrivalTime: yesterday, officeId: 1 };
       await apptController.userUpdateAppointment(1, updates, 1)
+
         .then(() => {
           expect('this should not have been called').to.be.false;
         })
@@ -237,6 +239,7 @@ describe('controllers/appointment', () => {
     it('should throw an error if trying to edit appt with a non valid  status', async () => {
       const editions = { id: 1, status: 'not valid status' };
       await apptController.editAppointment(editions)
+
         .then(() => {
           expect('this should not have been called').to.be.false;
         })

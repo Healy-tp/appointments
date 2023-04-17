@@ -13,6 +13,7 @@ router.get('/', currentUser, getAppointmentsByUserId);
 router.get('/history-with-user/:id', currentUser, getHistory);
 router.get('/mark-assisted/:id', markApptAssisted);
 
+
 router.put('/:id', currentUser, updateAppointment);
 
 router.delete('/:id', currentUser, deleteAppointment);
@@ -119,10 +120,10 @@ async function startChat(req, res, next) {
   }
 }
 
-async function doctorAppointmentCancelation(req, res, next) {
+async function doctorAppointmentCancellation(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const response = await apptController.doctorAppointmentCancelation(apptId);
+    const response = await apptController.doctorAppointmentCancellation(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -181,10 +182,10 @@ async function upsertNotes(req, res, next) {
   }
 }
 
-async function markApptAssisted(req, res, next) {
+async function markAssisted(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const response = await apptController.markApptAssisted(apptId);
+    const response = await apptController.markAssisted(apptId);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);

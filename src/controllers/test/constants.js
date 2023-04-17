@@ -22,6 +22,9 @@ const OFFICE_NUMBER = 1000;
 const AVAILABILITY_IDS = _.range(561, 591); // 561-590
 const AVAILABILITY_ID = AVAILABILITY_IDS[0];
 
+const USER_IDS = _.range(591, 621); // 591-621
+const USER_ID = USER_IDS[0];
+
 const VALID_UNTIL_DATE = new Date(2030, 1, 1);
 
 module.exports = {
@@ -37,6 +40,9 @@ module.exports = {
 
   AVAILABILITY_IDS,
   AVAILABILITY_ID,
+
+  USER_IDS,
+  USER_ID,
 
   VALID_UNTIL_DATE,
 };

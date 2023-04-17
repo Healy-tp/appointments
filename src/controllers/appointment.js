@@ -20,12 +20,12 @@ const self = {
   getAllAppointments,
   startChat,
   getAppointmentsInInterval,
-  doctorAppointmentCancelation,
+  doctorAppointmentCancellation,
   doctorDayCancelation,
   userConfirmAppointment,
   getHistoryBetween,
   upsertNotes,
-  markApptAssisted,
+  markAssisted,
 };
 
 module.exports = self;
@@ -41,8 +41,7 @@ async function getAppointmentsByUserId(userId, isDoctor) {
     },
     {
       model: User,
-    },
-    ],
+    }],
   };
   return Appointment.findAll(filters);
 }
@@ -54,6 +53,10 @@ async function createAppointment({
   userId,
   isExtraAppt,
 }, isAdmin) {
+  if (!arrivalTime || !doctorId || !userId) {
+    throw new Error('Missing required fields');
+  }
+
   let extraApptDt = null;
   const extraAppt = isExtraAppt && isAdmin;
   if (!extraAppt) {
@@ -115,6 +118,7 @@ async function createAppointment({
 }
 
 async function userUpdateAppointment(id, updates, userId) {
+
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -133,13 +137,17 @@ async function userUpdateAppointment(id, updates, userId) {
   return existingAppt.update({
     ...updates,
     timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
-  });
+  }, filters);
 }
 
 async function editAppointment({
   id,
   status,
 }) {
+  if (!id) {
+    throw new Error('Appointment ID is required');
+  }
+
   if (!status || !_.includes(_.values(APPOINTMENT_STATUS), status)) {
     throw new Error('Cannot edit an appointment without a valid status');
   }
@@ -168,8 +176,8 @@ async function deleteAppointment(id, userId) {
   return true;
 }
 
-async function getAllAppointments(forAdmin = false) {
-  const params = !forAdmin ? {
+async function getAllAppointments(isAdmin = false) {
+  const params = !isAdmin ? {
     attributes: ['doctorId', 'arrivalTime'],
   } : {
     include: [{ model: Doctor }, { model: User }],
@@ -179,8 +187,13 @@ async function getAllAppointments(forAdmin = false) {
 }
 
 async function startChat(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   const appt = await Appointment.findOne({ where: { id: apptId } });
   rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
+
     appointmentId: appt.id,
     userId: appt.userId,
     doctorId: appt.doctorId,
@@ -201,7 +214,7 @@ async function getAppointmentsInInterval(days) {
   return appointments;
 }
 
-async function doctorAppointmentCancelation(apptId) {
+async function doctorAppointmentCancellation(apptId) {
   const appt = await Appointment.findByPk(apptId);
   appt.update({ status: APPOINTMENT_STATUS.CANCELLED });
 
@@ -239,7 +252,11 @@ async function doctorAppointmentCancelation(apptId) {
 }
 
 async function doctorDayCancelation(doctorId, dateString) {
-  const [nUpdatedAppts, appts] = await Appointment.update({
+  if (!doctorId) {
+    throw new Error('Doctor ID is required');
+  }
+
+  const [updatedApptsCount, appts] = await Appointment.update({
     status: APPOINTMENT_STATUS.CANCELLED,
   }, {
     where: {
@@ -267,7 +284,7 @@ async function doctorDayCancelation(doctorId, dateString) {
       newProposedAppts.push(a);
       unavailableSlots[a.getTime()] = true;
     }
-    return newProposedAppts.length !== nUpdatedAppts;
+    return newProposedAppts.length !== updatedApptsCount;
   });
 
   const updateMsgs = [];
@@ -292,9 +309,15 @@ async function doctorDayCancelation(doctorId, dateString) {
 }
 
 async function userConfirmAppointment(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   return Appointment.update({
     status: APPOINTMENT_STATUS.CONFIRMED,
-  }, { where: { id: apptId } });
+  }, {
+    where: { id: apptId },
+  });
 }
 
 async function getHistoryBetween({ doctorId, userId }) {
@@ -319,6 +342,14 @@ async function getHistoryBetween({ doctorId, userId }) {
 }
 
 async function upsertNotes(apptId, payload) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
+  if (!payload.notes) {
+    throw new Error('You must provide notes');
+  }
+
   await Appointment.update(
     {
       notes: payload.text,
@@ -331,7 +362,11 @@ async function upsertNotes(apptId, payload) {
   );
 }
 
-async function markApptAssisted(apptId) {
+async function markAssisted(apptId) {
+  if (!apptId) {
+    throw new Error('Appointment ID is required');
+  }
+
   await Appointment.update(
     {
       assisted: true,

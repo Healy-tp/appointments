@@ -4,7 +4,9 @@ const { Doctor } = require('./doctor');
 const { Office } = require('./office');
 const { User } = require('./user');
 
-const db = { Appointment, Availability, Doctor, Office, User };
+const db = {
+  Appointment, Availability, Doctor, Office, User,
+};
 
 const associate = () => {
   Object.keys(db).forEach((modelName) => {
