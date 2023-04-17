@@ -11,7 +11,7 @@ const apptController = require('../../../controllers/appointment');
 router.get('/all', getAllAppointments);
 router.get('/', currentUser, getAppointmentsByUserId);
 router.get('/history-with-user/:id', currentUser, getHistory);
-router.get('/mark-assisted/:id', markApptAssisted);
+router.get('/mark-assisted/:id', markAssisted);
 
 
 router.put('/:id', currentUser, updateAppointment);
@@ -21,7 +21,7 @@ router.delete('/:id', currentUser, deleteAppointment);
 router.post('/', currentUser, createAppointment);
 router.post('/:id/start-chat', currentUser, startChat);
 router.post('/:id/upsert-notes', currentUser, upsertNotes);
-router.post('/:id/doctor-cancelation', currentUser, doctorAppointmentCancelation);
+router.post('/:id/doctor-cancelation', currentUser, doctorAppointmentCancellation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
 router.post('/doctor-day-cancelation', currentUser, doctorDayCancelation);
 
