@@ -1,29 +1,28 @@
 const router = require('express').Router();
 const _ = require('lodash');
-const { currentUser, hasPermissions } = require('@healy-tp/common');
+const { currentUser } = require('@healy-tp/common');
 
 const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
-const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 /* ****** route definitions ****** */
 // TODO: Improve error handling
 
 router.get('/all', getAllAppointments);
-router.get('/', [currentUser, hasPermissions('GET_APPTS', RolesPermissions)], getAppointmentsByUserId);
-router.get('/history-with-user/:id', [currentUser, hasPermissions('GET_HISTORY', RolesPermissions)], getHistory);
+router.get('/', currentUser, getAppointmentsByUserId);
+router.get('/history-with-user/:id', currentUser, getHistory);
 router.get('/mark-assisted/:id', markApptAssisted);
 
-router.put('/:id', [currentUser, hasPermissions('EDIT_APPTS', RolesPermissions)], updateAppointment);
+router.put('/:id', currentUser, updateAppointment);
 
-router.delete('/:id', [currentUser, hasPermissions('DELETE_APPTS', RolesPermissions)], deleteAppointment);
+router.delete('/:id', currentUser, deleteAppointment);
 
-router.post('/', [currentUser, hasPermissions('CREATE_APPT', RolesPermissions)], createAppointment);
-router.post('/:id/start-chat', [currentUser, hasPermissions('START_CHAT', RolesPermissions)], startChat);
-router.post('/:id/upsert-notes', [currentUser, hasPermissions('EDIT_NOTES', RolesPermissions)], upsertNotes);
-router.post('/:id/doctor-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorAppointmentCancelation);
+router.post('/', currentUser, createAppointment);
+router.post('/:id/start-chat', currentUser, startChat);
+router.post('/:id/upsert-notes', currentUser, upsertNotes);
+router.post('/:id/doctor-cancelation', currentUser, doctorAppointmentCancelation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
-router.post('/doctor-day-cancelation', [currentUser, hasPermissions('DOCTOR_CANCELATION', RolesPermissions)], doctorDayCancelation);
+router.post('/doctor-day-cancelation', currentUser, doctorDayCancelation);
 
 module.exports = router;
 
@@ -51,7 +50,11 @@ async function updateAppointment(req, res, next) {
       arrivalTime,
       doctorId,
       officeId,
-    });
+    }, req.currentUser.id);
+    if (!response) {
+      res.status(403).send();
+    }
+
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -86,7 +89,8 @@ async function createAppointment(req, res, next) {
 async function deleteAppointment(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');
-    const response = await apptController.deleteAppointment(apptId);
+    const response = await apptController.deleteAppointment(apptId, req.currentUser.id);
+    if (!response) res.status(403).send();
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -137,6 +141,8 @@ async function doctorDayCancelation(req, res, next) {
   }
 }
 
+
+// TODO: CHECK IF ADD CURRENT USER MDDWARE
 async function userConfirmAppointment(req, res, next) {
   try {
     const apptId = _.get(req, 'params.id');

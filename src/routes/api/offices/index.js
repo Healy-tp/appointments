@@ -1,11 +1,10 @@
 const router = require('express').Router();
 
-const { currentUser, hasPermissions } = require('@healy-tp/common');
+const { currentUser } = require('@healy-tp/common');
 const logger = require('../../../logger');
 const officeController = require('../../../controllers/office');
-const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
-router.get('/', [currentUser, hasPermissions('GET_OFFICES', RolesPermissions)], getAllOffices);
+router.get('/', currentUser, getAllOffices);
 
 module.exports = router;
 

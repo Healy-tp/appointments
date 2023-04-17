@@ -1,17 +1,16 @@
 /* eslint-disable consistent-return */
 const router = require('express').Router();
 
-const { currentUser, hasPermissions } = require('@healy-tp/common');
+const { currentUser } = require('@healy-tp/common');
 const logger = require('../../../logger');
 const availabilityController = require('../../../controllers/availability');
-const { RolesPermissions } = require('../../../db/models/rolesPermissions');
 
 /* ****** route definitions ****** */
 
 // Add isAdmin middleware check to createAvailability
-router.post('/', [currentUser, hasPermissions('CREATE_AVAILABILITY', RolesPermissions)], createAvailability);
+router.post('/', currentUser, createAvailability);
 router.get('/all', getAllRecords);
-router.get('/', [currentUser, hasPermissions('GET_AVAILABILITY_BY_DOC_ID', RolesPermissions)], getAvailabilityByDoctorId);
+router.get('/', currentUser, getAvailabilityByDoctorId);
 
 module.exports = router;
 

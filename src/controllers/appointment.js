@@ -7,7 +7,7 @@ const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
-const { sendMessage } = require('../rabbitmq/sender');
+const rmq = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
@@ -31,7 +31,7 @@ const self = {
 module.exports = self;
 
 async function getAppointmentsByUserId(userId, isDoctor) {
-  const where = isDoctor ? { doctorId: userId} : { userId };
+  const where = isDoctor ? { doctorId: userId } : { userId };
   const filters = {
     where,
     attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
@@ -114,7 +114,7 @@ async function createAppointment({
   });
 }
 
-async function userUpdateAppointment(id, updates) {
+async function userUpdateAppointment(id, updates, userId) {
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -128,6 +128,8 @@ async function userUpdateAppointment(id, updates) {
   }
 
   const existingAppt = await Appointment.findOne(filters);
+  if (existingAppt.userId !== userId) return false;
+
   return existingAppt.update({
     ...updates,
     timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
@@ -159,8 +161,11 @@ async function editAppointment({
   }, filters);
 }
 
-async function deleteAppointment(id) {
+async function deleteAppointment(id, userId) {
+  const appt = await Appointment.findOne({ where: id });
+  if (appt.userId !== userId) return false;
   await Appointment.destroy({ where: { id } });
+  return true;
 }
 
 async function getAllAppointments(forAdmin = false) {
@@ -175,7 +180,7 @@ async function getAllAppointments(forAdmin = false) {
 
 async function startChat(apptId) {
   const appt = await Appointment.findOne({ where: { id: apptId } });
-  sendMessage(queueConstants.CHAT_STARTED_EVENT, {
+  rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
     appointmentId: appt.id,
     userId: appt.userId,
     doctorId: appt.doctorId,
@@ -211,13 +216,12 @@ async function doctorAppointmentCancelation(apptId) {
   availabilities.every((a) => {
     if (!unavailableSlots[a.getTime()]) {
       newDate = a;
-      // console.log(newDate);
       return false;
     }
     return true;
   });
 
-  sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
+  rmq.sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
     proposedTime: newDate,
     oldTime: appt.arrivalTime,
     userId: appt.userId,
@@ -284,7 +288,7 @@ async function doctorDayCancelation(doctorId, dateString) {
     });
   });
 
-  sendMessage(queueConstants.DAY_CANCEL_BY_DOCTOR, updateMsgs);
+  rmq.sendMessage(queueConstants.DAY_CANCEL_BY_DOCTOR, updateMsgs);
 }
 
 async function userConfirmAppointment(apptId) {

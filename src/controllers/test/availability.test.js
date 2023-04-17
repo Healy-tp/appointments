@@ -252,7 +252,7 @@ describe('controllers/availability', () => {
       await availabilityController.createAvailability(input)
         .then(() => {
           expect('this should not have been called').to.be.false;
-        })
+        })  
         .catch((err) => {
           expect(availabilitiesInOfficeStub.calledOnce).to.be.true;
           expect(existingAvailabilityStub.calledOnce).to.be.true;
