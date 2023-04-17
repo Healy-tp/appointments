@@ -310,7 +310,7 @@ describe('controllers/appointment', () => {
   describe('startChat', () => {
     it('should be able to start chat successfully', async () => {
       modelStub = sinon.stub(Appointment, 'findOne').returns({});
-      const response = await apptController.startChat();
+      const response = await apptController.startChat(1);
       expect(modelStub.calledOnce).to.be.true;
       expect(response).to.be.undefined;
     });
@@ -326,7 +326,7 @@ describe('controllers/appointment', () => {
     });
   });
 
-  describe('doctorAppointmentCancelation', () => {
+  describe('doctorAppointmentCancellation', () => {
     it('', async () => {
       modelStub = sinon.stub(Appointment, 'findByPk').returns({
         update: sinon.stub().returns(null),
@@ -355,7 +355,7 @@ describe('controllers/appointment', () => {
       const allAvailabilitiesStub = sinon.stub(Availability, 'getAllAvailableSlotsForDoctor').returns([[av1, av2, av3], offices]);
       const createStub = sinon.stub(Appointment, 'create').returns(newAppt);
 
-      const response = await apptController.doctorAppointmentCancelation(1)
+      const response = await apptController.doctorAppointmentCancellation(1);
 
       expect(modelStub.calledOnce).to.be.true;
       expect(allApptsDoctorStub.calledOnce).to.be.true;
@@ -399,11 +399,11 @@ describe('controllers/appointment', () => {
     });
   });
 
-  describe('markApptAssisted', () => {
+  describe('markAssisted', () => {
     it('should mark appt assisted successfully', async () => {
       const mockedRecords = outputMockData.getMockAppointments();
       modelStub = sinon.stub(Appointment, 'update').returns(mockedRecords[0]);
-      const response = await apptController.markApptAssisted(1);
+      const response = await apptController.markAssisted(1);
       expect(modelStub.calledOnce).to.be.true;
       expect(response).to.be.eql(undefined);
     });

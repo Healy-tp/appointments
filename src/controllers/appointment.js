@@ -90,7 +90,7 @@ async function createAppointment({
             new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
             new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
           ],
-        }
+        },
       },
     });
 
@@ -118,7 +118,6 @@ async function createAppointment({
 }
 
 async function userUpdateAppointment(id, updates, userId) {
-
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -346,7 +345,7 @@ async function upsertNotes(apptId, payload) {
     throw new Error('Appointment ID is required');
   }
 
-  if (!payload.notes) {
+  if (!payload.text) {
     throw new Error('You must provide notes');
   }
 
