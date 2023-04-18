@@ -7,7 +7,7 @@ const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
-const { sendMessage } = require('../rabbitmq/sender');
+const rmq = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
@@ -31,10 +31,6 @@ const self = {
 module.exports = self;
 
 async function getAppointmentsByUserId(userId, isDoctor) {
-  if (!userId) {
-    throw new Error('User ID is required');
-  }
-
   const where = isDoctor ? { doctorId: userId } : { userId };
   const filters = {
     where,
@@ -94,7 +90,7 @@ async function createAppointment({
             new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
             new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
           ],
-        }
+        },
       },
     });
 
@@ -121,11 +117,7 @@ async function createAppointment({
   });
 }
 
-async function userUpdateAppointment(id, updates) {
-  if (!id) {
-    throw new Error('Appointment ID is required');
-  }
-
+async function userUpdateAppointment(id, updates, userId) {
   const { arrivalTime, officeId } = updates;
   const arrivalTimeDt = new Date(arrivalTime);
   if (arrivalTimeDt < Date.now()) {
@@ -139,11 +131,9 @@ async function userUpdateAppointment(id, updates) {
   }
 
   const existingAppt = await Appointment.findOne(filters);
-  if (!existingAppt) {
-    throw new Error(`Appointment "${id}" not found.`);
-  }
+  if (existingAppt.userId !== userId) return false;
 
-  return Appointment.update({
+  return existingAppt.update({
     ...updates,
     timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
   }, filters);
@@ -178,12 +168,11 @@ async function editAppointment({
   }, filters);
 }
 
-async function deleteAppointment(id) {
-  if (!id) {
-    throw new Error('Appointment ID is required');
-  }
-
+async function deleteAppointment(id, userId) {
+  const appt = await Appointment.findOne({ where: id });
+  if (appt.userId !== userId) return false;
   await Appointment.destroy({ where: { id } });
+  return true;
 }
 
 async function getAllAppointments(isAdmin = false) {
@@ -202,11 +191,8 @@ async function startChat(apptId) {
   }
 
   const appt = await Appointment.findOne({ where: { id: apptId } });
-  if (!appt) {
-    throw new Error(`Appointment "${apptId}" not found.`);
-  }
+  rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
 
-  sendMessage(queueConstants.CHAT_STARTED_EVENT, {
     appointmentId: appt.id,
     userId: appt.userId,
     doctorId: appt.doctorId,
@@ -242,13 +228,12 @@ async function doctorAppointmentCancellation(apptId) {
   availabilities.every((a) => {
     if (!unavailableSlots[a.getTime()]) {
       newDate = a;
-      // console.log(newDate);
       return false;
     }
     return true;
   });
 
-  sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
+  rmq.sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
     proposedTime: newDate,
     oldTime: appt.arrivalTime,
     userId: appt.userId,
@@ -319,7 +304,7 @@ async function doctorDayCancelation(doctorId, dateString) {
     });
   });
 
-  sendMessage(queueConstants.DAY_CANCEL_BY_DOCTOR, updateMsgs);
+  rmq.sendMessage(queueConstants.DAY_CANCEL_BY_DOCTOR, updateMsgs);
 }
 
 async function userConfirmAppointment(apptId) {
@@ -360,7 +345,7 @@ async function upsertNotes(apptId, payload) {
     throw new Error('Appointment ID is required');
   }
 
-  if (!payload.notes) {
+  if (!payload.text) {
     throw new Error('You must provide notes');
   }
 

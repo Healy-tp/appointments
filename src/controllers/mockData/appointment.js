@@ -1,27 +1,47 @@
-const {
-  APPOINTMENT_ID, DOCTOR_ID, OFFICE_ID, USER_ID,
-} = require('../test/constants');
-const { APPOINTMENT_STATUS } = require('../../utils/constants');
+const { APPOINTMENT_STATUS } = require("../../utils/constants");
 
-const fakeAppointment = {
-  id: APPOINTMENT_ID,
-  doctorId: DOCTOR_ID,
-  officeId: OFFICE_ID,
-  userId: USER_ID,
+const fakeAppt1 = {
+  id: 1,
+  arrivalTime: '2022-12-18T12:00:00.000Z', 
   status: APPOINTMENT_STATUS.CONFIRMED,
-  arrivalTime: '2022-11-29T14:00:00.000Z',
-  timesModifiedByUser: 0,
+  doctorId: 2,
+  timesModifiedByUser: 1,
+  officeId: 1,
+  Doctor: {
+    firstName: 'Test',
+    lastName: 'Doctor',
+    specialty: 'General',
+  },
+  User: {
+    id: 2,
+    firstName: 'Test',
+    lastName: 'User',
+  },
 };
 
-function getAppointmentsByUserId(userId) {
-  if (userId === USER_ID) {
-    return [fakeAppointment];
-  }
-  return [];
+const fakeAppt2 = {
+  id: 1,
+  arrivalTime: '2022-12-18T12:30:00.000Z',
+  status: APPOINTMENT_STATUS.CONFIRMED,
+  doctorId: 2,
+  timesModifiedByUser: 1,
+  officeId: 1,
+  Doctor: {
+    firstName: 'Test',
+    lastName: 'Doctor',
+    specialty: 'General',
+  },
+  User: {
+    id: 2,
+    firstName: 'Test',
+    lastName: 'User',
+  },
+};
+
+function getMockAppointments() {
+  return [fakeAppt1, fakeAppt2];
 }
 
 module.exports = {
-  getAppointmentsByUserId,
-
-  fakeAppointment,
+  getMockAppointments,
 };

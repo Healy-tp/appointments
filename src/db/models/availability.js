@@ -84,8 +84,6 @@ class Availability extends Model {
       validUntils[av.weekday] = new Date(av.validUntil);
     });
 
-    // console.log(allAvailableSlotsForSpecificWeekday);
-
     const allAvailableSlots = [];
     allAvailableSlotsForSpecificWeekday.forEach((ad) => {
       while (ad < validUntils[ad.getDay()]) {
@@ -95,7 +93,7 @@ class Availability extends Model {
     });
 
     const response = allAvailableSlots.filter((a) => a > new Date());
-    // console.log(response);
+
     return [response.sort((o1, o2) => {
       if (o1 < o2) return -1;
       else if (o2 > o1) return 1;
