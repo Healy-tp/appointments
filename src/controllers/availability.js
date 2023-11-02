@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const moment = require('moment');
+const crypto = require('crypto');
 const { Op } = require('sequelize');
 
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
@@ -43,11 +44,11 @@ async function createAvailability({
       weekday,
       [Op.or]: [{
         startHour: {
-          [Op.between]: [startHour, endHour], // TODO: Fix bug and make between range not inclusive
+          [Op.between]: [`${startHour}:01`, `${endHour - 1}:59`],
         },
       }, {
         endHour: {
-          [Op.between]: [startHour, endHour],
+          [Op.between]: [`${startHour}:01`, `${endHour - 1}:59`],
         },
       }],
       validUntil: {
@@ -72,12 +73,15 @@ async function createAvailability({
     throw new Error(`Doctor ${doctorId} already has an availability on day ${weekday}`);
   }
 
+  const startHourTime = `${startHour}:00`;
+  const endHourTime = `${endHour}:00`;
   return Availability.create({
+    id: crypto.randomUUID(),
     doctorId,
     officeId,
     weekday,
-    startHour,
-    endHour,
+    startHour: startHourTime,
+    endHour: endHourTime,
     frequency,
     validUntil,
   });

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "IS_TEST=true nyc mocha \"./src/**/*.test.js\"",
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon --inspect=0.0.0.0:9229 src/index.js",
     "migrate": "npx sequelize-cli db:migrate",
     "add-migration": "npx sequelize-cli migration:generate --name",
     "add-seeders": "npx sequelize-cli db:seed:all",
@@ -29,6 +29,7 @@
     "luxon": "^3.0.3",
     "moment": "^2.29.4",
     "node-cron": "^3.0.2",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.21.1",

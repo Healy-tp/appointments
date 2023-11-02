@@ -37,15 +37,15 @@ class Appointment extends Model {
 
 Appointment.init({
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
   doctorId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
   },
-  userId: DataTypes.INTEGER,
-  officeId: DataTypes.INTEGER,
+  userId: DataTypes.UUID,
+  officeId: DataTypes.UUID,
   arrivalTime: DataTypes.DATE,
   status: {
     type: DataTypes.STRING,

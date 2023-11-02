@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 module.exports = {
+  ACTIVE_ENV: process.env.ACTIVE_ENV || 'development',
   PORT: process.env.PORT || 8080,
   PG_USER: process.env.POSTGRES_USER,
   PG_PASSWORD: process.env.POSTGRES_PASSWORD,

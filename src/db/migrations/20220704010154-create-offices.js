@@ -2,9 +2,10 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('offices', {
       id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        allowNull: false,
+        defaultValue: Sequelize.UUIDV4,
       },
       specialties: {
         type: Sequelize.ARRAY(Sequelize.STRING),

@@ -2,12 +2,13 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('appointments', {
       id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
+        type: Sequelize.UUID,
         primaryKey: true,
+        allowNull: false,
+        defaultValue: Sequelize.UUIDV4,
       },
       doctorId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: {
             tableName: 'doctors',
@@ -18,7 +19,7 @@ module.exports = {
         allowNull: false,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: {
             tableName: 'users',
@@ -29,7 +30,7 @@ module.exports = {
         allowNull: false,
       },
       officeId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: {
             tableName: 'offices',
