@@ -11,8 +11,8 @@ const apptController = require('../../../controllers/appointment');
 router.get('/all', getAllAppointments);
 router.get('/', currentUser, getAppointmentsByUserId);
 router.get('/history-with-user/:id', currentUser, getHistory);
+router.get('/export-history-with-user', currentUser, historyWithUserExport);
 router.get('/mark-assisted/:id', markAssisted);
-
 
 router.put('/:id', currentUser, updateAppointment);
 
@@ -24,6 +24,7 @@ router.post('/:id/upsert-notes', currentUser, upsertNotes);
 router.post('/:id/doctor-cancelation', currentUser, doctorAppointmentCancellation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
 router.post('/doctor-day-cancelation', currentUser, doctorDayCancelation);
+
 
 module.exports = router;
 
@@ -187,6 +188,17 @@ async function markAssisted(req, res, next) {
     const apptId = _.get(req, 'params.id');
     const response = await apptController.markAssisted(apptId);
     res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function historyWithUserExport(req, res, next) {
+  const { doctorId, userId } = req.query;
+  try {
+    const fileName = await apptController.exportPDF(doctorId, userId);
+    res.download(fileName, (err) => {if (err) console.log(err)});
   } catch (err) {
     logger.error(err.message);
     next(err);

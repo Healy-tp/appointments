@@ -213,8 +213,8 @@ describe('controllers/availability', () => {
         officeId: OFFICE_ID,
         weekday: WEEKDAYS.MONDAY,
         frequency: FREQUENCIES[0],
-        startHour: '13:00:00',
-        endHour: '16:00:00',
+        startHour: 11,
+        endHour: 14,
         validUntil: moment().add(1, 'days'),
       };
 
@@ -240,8 +240,8 @@ describe('controllers/availability', () => {
         officeId: OFFICE_ID,
         weekday: WEEKDAYS.MONDAY,
         frequency: FREQUENCIES[0],
-        startHour: '13:00:00',
-        endHour: '16:00:00',
+        startHour: 11,
+        endHour: 14,
         validUntil: moment().add(1, 'days'),
       };
 
@@ -270,8 +270,8 @@ describe('controllers/availability', () => {
         officeId: OFFICE_ID,
         weekday: WEEKDAYS.MONDAY,
         frequency: FREQUENCIES[0],
-        startHour: '13:00:00',
-        endHour: '16:00:00',
+        startHour: 11,
+        endHour: 14,
         validUntil: moment().add(1, 'days'),
       };
 

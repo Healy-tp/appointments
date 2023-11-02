@@ -2,11 +2,13 @@
 const { Op } = require('sequelize');
 const _ = require('lodash');
 const moment = require('moment');
+const crypto = require('crypto');
 
 const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
+const pdfGenerator = require('../pdf-generator');
 const rmq = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
@@ -26,6 +28,7 @@ const self = {
   getHistoryBetween,
   upsertNotes,
   markAssisted,
+  exportPDF,
 };
 
 module.exports = self;
@@ -108,6 +111,7 @@ async function createAppointment({
   }
 
   return Appointment.create({
+    id: crypto.randomUUID(),
     arrivalTime,
     doctorId,
     officeId,
@@ -169,9 +173,10 @@ async function editAppointment({
 }
 
 async function deleteAppointment(id, userId) {
-  const appt = await Appointment.findOne({ where: id });
+  const apptId = Number(id);
+  const appt = await Appointment.findOne({ where: apptId });
   if (appt.userId !== userId) return false;
-  await Appointment.destroy({ where: { id } });
+  await Appointment.destroy({ where: { id: apptId } });
   return true;
 }
 
@@ -241,6 +246,7 @@ async function doctorAppointmentCancellation(apptId) {
   });
 
   return Appointment.create({
+    id: crypto.randomUUID(),
     arrivalTime: newDate,
     doctorId: appt.doctorId,
     officeId: offices[newDate.getDay()],
@@ -289,6 +295,7 @@ async function doctorDayCancelation(doctorId, dateString) {
   const updateMsgs = [];
   appts.forEach((a, idx) => {
     Appointment.create({
+      id: crypto.randomUUID(),
       arrivalTime: newProposedAppts[idx],
       doctorId: a.doctorId,
       officeId: offices[newProposedAppts[idx].getDay()],
@@ -376,4 +383,14 @@ async function markAssisted(apptId) {
       },
     },
   );
+}
+
+async function exportPDF(doctorId, userId) {
+  const appts = await Appointment.findAll({
+    where: { doctorId, userId },
+    include: [{ model: Doctor }, { model: User }],
+  });
+  
+  const fileName = await pdfGenerator.generatePDF(appts);
+  return fileName;
 }

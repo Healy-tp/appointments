@@ -104,18 +104,18 @@ class Availability extends Model {
 
 Availability.init({
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
   doctorId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     // references: {
     //   model: Doctor,
     //   key: 'userId',
     // },
   },
-  officeId: DataTypes.INTEGER,
+  officeId: DataTypes.UUID,
   weekday: {
     type: DataTypes.INTEGER,
     allowNull: false,

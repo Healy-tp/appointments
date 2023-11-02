@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 const { getSpecialties } = require('@healy-tp/common');
 const { Office } = require('../db/models/office');
 
@@ -39,6 +40,7 @@ async function createOffice({
   }
 
   return Office.create({
+    id: crypto.randomUUID(),
     number: officeNumber,
     specialties,
   });

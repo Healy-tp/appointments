@@ -20,7 +20,7 @@ class User extends Model {
 
 User.init({
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     primaryKey: true,
   },
   firstName: DataTypes.STRING,
