@@ -1,4 +1,6 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Op, fn } = require('sequelize');
+const moment = require('moment');
+
 const { MAX_APPOINTMENT_UPDATES, APPOINTMENT_STATUS } = require('../../utils/constants');
 const { sequelize } = require('../dbsetup');
 const { Availability } = require('./availability');
@@ -21,15 +23,77 @@ class Appointment extends Model {
     });
   }
 
-  getFullname() {
-    return [this.firstName, this.lastName].join(' ');
+  canStartChat() {
+    const date = this.arrivalTime || this.extraAppt;
+    const now = new Date();
+    return (
+      moment(now).isSameOrBefore(date)
+        ? moment(now).isSameOrAfter(moment(date).subtract(7, 'days'))
+        : moment(now).isSameOrBefore(moment(date).add(15, 'days'))
+    );
+  }
+
+  static async rescheduleAppointment(doctorId) {
+    const unavailableSlots = {};
+    const appointments = await this.getAllAppointmentsForDoctor(doctorId);
+    appointments.forEach((ap) => {
+      unavailableSlots[ap.arrivalTime.getTime()] = true;
+    });
+
+    const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(doctorId);
+    let newDate;
+    availabilities.every((a) => {
+      if (!unavailableSlots[a.getTime()]) {
+        newDate = a;
+        return false;
+      }
+      return true;
+    });
+    return [newDate, offices];
+  }
+
+  static async rescheduleAppointmentUsingExtraSlots(doctorId) {
+    const extraApptsAvailable = await Availability.getAvailableExtraAppointments(doctorId);
+    const extraAppts = await this.getAllExtraAppointmentsForDoctor(doctorId);
+    extraAppts.forEach((a) => {
+      const x = new Date(a.dataValues.extraAppt);
+      extraApptsAvailable[x.getTime()] = extraApptsAvailable[x.getTime()] - a.dataValues.count;
+    });
+    let newDate;
+    let isExtra;
+    const sortedKeys = Object.keys(extraApptsAvailable).sort();
+    sortedKeys.every((k) => {
+      if (extraApptsAvailable[k] > 0) {
+        newDate = new Date(parseInt(k));
+        isExtra = true;
+        return false;
+      }
+      return true;
+    });
+    return [newDate, isExtra];
   }
 
   static async getAllAppointmentsForDoctor(doctorId) {
     const appointments = await this.findAll({
       where: {
         doctorId,
+        extraAppt: null,
       },
+    });
+    return appointments;
+  }
+
+  static async getAllExtraAppointmentsForDoctor(doctorId) {
+    const appointments = await this.findAll({
+      attributes: ['extraAppt', [fn('COUNT', 'id'), 'count']],
+      where: {
+        doctorId,
+        extraAppt: {
+          [Op.ne]: null,
+        },
+      },
+      group: ['extraAppt'],
+      order: [['extraAppt', 'ASC']],
     });
     return appointments;
   }

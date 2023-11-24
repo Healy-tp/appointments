@@ -8,6 +8,7 @@ const { Appointment } = require('../db/models/appointment');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
+const { Office } = require('../db/models/office');
 const pdfGenerator = require('../pdf-generator');
 const rmq = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
@@ -37,13 +38,16 @@ async function getAppointmentsByUserId(userId, isDoctor) {
   const where = isDoctor ? { doctorId: userId } : { userId };
   const filters = {
     where,
-    attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId'],
+    attributes: ['id', 'arrivalTime', 'status', 'doctorId', 'timesModifiedByUser', 'officeId', 'extraAppt'],
     include: [{
       model: Doctor,
       attributes: ['firstName', 'lastName', 'specialty'],
     },
     {
       model: User,
+    },
+    {
+      model: Office,
     }],
   };
   return Appointment.findAll(filters);
@@ -172,9 +176,8 @@ async function editAppointment({
   }, filters);
 }
 
-async function deleteAppointment(id, userId) {
-  const apptId = Number(id);
-  const appt = await Appointment.findOne({ where: apptId });
+async function deleteAppointment(apptId, userId) {
+  const appt = await Appointment.findOne({ where: { id: apptId } });
   if (appt.userId !== userId) return false;
   await Appointment.destroy({ where: { id: apptId } });
   return true;
@@ -196,8 +199,11 @@ async function startChat(apptId) {
   }
 
   const appt = await Appointment.findOne({ where: { id: apptId } });
-  rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
+  if (!appt.canStartChat()) {
+    throw new Error('You can only start a chat within 7 days of your appointment of 15 days past it.');
+  }
 
+  rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
     appointmentId: appt.id,
     userId: appt.userId,
     doctorId: appt.doctorId,
@@ -222,21 +228,11 @@ async function doctorAppointmentCancellation(apptId) {
   const appt = await Appointment.findByPk(apptId);
   appt.update({ status: APPOINTMENT_STATUS.CANCELLED });
 
-  const unavailableSlots = {};
-  const appointments = await Appointment.getAllAppointmentsForDoctor(appt.doctorId);
-  appointments.forEach((ap) => {
-    unavailableSlots[ap.arrivalTime.getTime()] = true;
-  });
-
-  const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(appt.doctorId);
-  let newDate;
-  availabilities.every((a) => {
-    if (!unavailableSlots[a.getTime()]) {
-      newDate = a;
-      return false;
-    }
-    return true;
-  });
+  let [newDate, offices] = await Appointment.rescheduleAppointment(appt.doctorId);
+  let isExtra;
+  if (!newDate) {
+    [newDate, isExtra] = await Appointment.rescheduleAppointmentUsingExtraSlots(appt.doctorId);
+  }
 
   rmq.sendMessage(queueConstants.APPT_CANCEL_BY_DOCTOR, {
     proposedTime: newDate,
@@ -247,11 +243,11 @@ async function doctorAppointmentCancellation(apptId) {
 
   return Appointment.create({
     id: crypto.randomUUID(),
-    arrivalTime: newDate,
+    arrivalTime: !isExtra ? newDate : null,
     doctorId: appt.doctorId,
     officeId: offices[newDate.getDay()],
     userId: appt.userId,
-    // extraAppt: extraApptDt,
+    extraAppt: isExtra ? newDate : null,
     status: APPOINTMENT_STATUS.TO_CONFIRM,
   });
 }
@@ -261,16 +257,13 @@ async function doctorDayCancelation(doctorId, dateString) {
     throw new Error('Doctor ID is required');
   }
 
-  const [updatedApptsCount, appts] = await Appointment.update({
+  const [canceledApptsCount, canceledAppts] = await Appointment.update({
     status: APPOINTMENT_STATUS.CANCELLED,
   }, {
     where: {
       doctorId,
       arrivalTime: {
-        [Op.between]: [
-          new Date(dateString),
-          new Date(`${dateString} 23:59`),
-        ],
+        [Op.between]: [new Date(dateString), new Date(`${dateString} 23:59`)],
       },
     },
     returning: true,
@@ -289,18 +282,36 @@ async function doctorDayCancelation(doctorId, dateString) {
       newProposedAppts.push(a);
       unavailableSlots[a.getTime()] = true;
     }
-    return newProposedAppts.length !== updatedApptsCount;
+    return newProposedAppts.length !== canceledApptsCount;
   });
 
+  if (!newProposedAppts.length !== canceledApptsCount) {
+    const extraApptsAvailable = await Availability.getAvailableExtraAppointments(doctorId);
+    const extraAppts = await Appointment.getAllExtraAppointmentsForDoctor(doctorId);
+    extraAppts.forEach((a) => {
+      const x = new Date(a.dataValues.extraAppt);
+      extraApptsAvailable[x.getTime()] = extraApptsAvailable[x.getTime()] - a.dataValues.count;
+    });
+    const sortedKeys = Object.keys(extraApptsAvailable).sort();
+    sortedKeys.every((k) => {
+      if (extraApptsAvailable[k] > 0) {
+        newProposedAppts.push(new Date(parseInt(k)));
+        unavailableSlots[new Date(parseInt(k)).getTime()] = true;
+      }
+      return newProposedAppts.length !== canceledApptsCount;
+    });
+  }
+
+
   const updateMsgs = [];
-  appts.forEach((a, idx) => {
+  canceledAppts.forEach((a, idx) => {
     Appointment.create({
       id: crypto.randomUUID(),
-      arrivalTime: newProposedAppts[idx],
+      arrivalTime: newProposedAppts[idx].getUTCHours() !== 0 ? newProposedAppts[idx] : null,
       doctorId: a.doctorId,
       officeId: offices[newProposedAppts[idx].getDay()],
       userId: a.userId,
-      // extraAppt: extraApptDt,
+      extraAppt: newProposedAppts[idx].getUTCHours() === 0 ? newProposedAppts[idx] : null,
       status: APPOINTMENT_STATUS.TO_CONFIRM,
     });
     updateMsgs.push({

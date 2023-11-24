@@ -13,7 +13,15 @@ module.exports = {
       createdAt: new Date(),
       updatedAt: new Date(),
       id: 'd10e663b-6499-489b-8aa7-297455feac11',
-    }], {});
+    },
+    {
+      firstName: 'Demo',
+      lastName: 'User 2',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: 'de5b9a94-87c1-48af-aea8-fe6764f8b228',
+    },
+    ], {});
   },
 
   async down(queryInterface) {

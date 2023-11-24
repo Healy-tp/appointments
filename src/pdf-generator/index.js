@@ -1,5 +1,6 @@
-const { PDFDocument, rgb, lineSplit } = require('pdf-lib');
+const { PDFDocument, rgb } = require('pdf-lib');
 const fs = require('fs');
+const logger = require('../logger');
 
 const PAGE_WIDTH = 595;
 const PAGE_HEIGHT = 842;
@@ -12,7 +13,7 @@ const BODY_SIZE = 12;
 
 const self = {
   generatePDF,
-}
+};
 
 module.exports = self;
 
@@ -63,28 +64,32 @@ function addText(page, font, text, yPosition, size) {
   });
 }
 
+function saveFile(pdfBytes, appt) {
+  const dir = `${__dirname}/${appt.doctorId}/${appt.userId}/`;
+  const fileName = `${dir}output_2.pdf`;
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(fileName, pdfBytes);
+  return fileName;
+}
+
 async function generatePDF(appts) {
-  // Create a new PDF document
   const pdfDoc = await PDFDocument.create();
-  // Create a font for the header text
   const font = await pdfDoc.embedFont('Helvetica');
   const mainPage = addPage(pdfDoc, font, appts[0]);
 
   let currentPage = mainPage;
-  let yPosition = currentPage.getHeight() - 90; // Initial Y-coordinate with extra space
+  let yPosition = currentPage.getHeight() - 90;
   let appt, newLines, lineLength;
   for (let i = 0; i < appts.length; i++) {
     appt = appts[i];
-    // Falta aca
     if (yPosition - TITLE_SIZE < 50) {
-      // Create a new page if there's not enough space
       currentPage = addPage([PAGE_WIDTH, PAGE_HEIGHT]);
       yPosition = currentPage.getHeight() - 50;
-    };
+    }
+
     // Title
     addText(currentPage, font, appts[i].arrivalTime.toJSON(), yPosition, TITLE_SIZE);
     yPosition -= TITLE_SIZE;
-
     // Body
     addText(currentPage, font, appts[i].notes, yPosition, BODY_SIZE);
 
@@ -94,27 +99,7 @@ async function generatePDF(appts) {
 
     yPosition -= (3 + lineLength + newLines) * BODY_SIZE;
   }
-
-  // Serialize the PDF to bytes
   const pdfBytes = await pdfDoc.save();
-
-  // Create a new directory
-  const dir = `${__dirname}/${appts[0].doctorId}/${appts[0].userId}/`;
-  const fileName = `${dir}output_2.pdf`;
-  fs.mkdir(dir, { recursive: true }, (err) => {
-    if (err) {
-      console.error('Error creating directory:', err);
-    } else {
-      console.log('Directory created successfully.');
-      // Write a new file into the new directory
-      fs.writeFile(fileName, pdfBytes, (err) => {
-        if (err) {
-          console.error('Error creating the file:', err);
-        } else {
-          console.log('New file created in the directory.');
-        }
-      });
-    }
-  });
+  const fileName = saveFile(pdfBytes, appts[0]);
   return fileName;
-};
+}

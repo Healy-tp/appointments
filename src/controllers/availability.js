@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const { FREQUENCIES, WEEKDAYS } = require('../utils/constants');
 const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
+const { Office } = require('../db/models/office');
 
 const self = {
   createAvailability,
@@ -96,7 +97,7 @@ async function getByDoctorId(doctorId) {
     where: {
       doctorId,
     },
-    raw: true,
+    include: [{ model: Office }],
   };
   return Availability.findAll(filters);
 }
