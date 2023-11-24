@@ -1,3 +1,4 @@
+const fs = require('fs');
 const router = require('express').Router();
 const _ = require('lodash');
 const { currentUser } = require('@healy-tp/common');
@@ -135,7 +136,7 @@ async function doctorAppointmentCancellation(req, res, next) {
 async function doctorDayCancelation(req, res, next) {
   try {
     const { day } = req.body;
-    const response = await apptController.doctorDayCancelation(4, day);
+    const response = await apptController.doctorDayCancelation(req.currentUser.id, day);
     res.status(200).send(response);
   } catch (err) {
     logger.error(err.message);
@@ -198,7 +199,10 @@ async function historyWithUserExport(req, res, next) {
   const { doctorId, userId } = req.query;
   try {
     const fileName = await apptController.exportPDF(doctorId, userId);
-    res.download(fileName, (err) => {if (err) console.log(err)});
+    const data = fs.readFileSync(fileName);
+    res.contentType('application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=history.pdf');
+    res.send(data);
   } catch (err) {
     logger.error(err.message);
     next(err);

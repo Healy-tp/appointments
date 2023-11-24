@@ -309,7 +309,7 @@ describe('controllers/appointment', () => {
 
   describe('startChat', () => {
     it('should be able to start chat successfully', async () => {
-      modelStub = sinon.stub(Appointment, 'findOne').returns({});
+      modelStub = sinon.stub(Appointment, 'findOne').returns({ canStartChat: sinon.stub().returns(true) });
       const response = await apptController.startChat(1);
       expect(modelStub.calledOnce).to.be.true;
       expect(response).to.be.undefined;
@@ -333,7 +333,7 @@ describe('controllers/appointment', () => {
       });
 
       const appt1 = { arrivalTime: new Date(new Date().setDate(new Date().getDate() + 1)) };
-      const appt2 = { arrivalTime: new Date(new Date().setDate(new Date().getDate() + 2))};
+      const appt2 = { arrivalTime: new Date(new Date().setDate(new Date().getDate() + 2)) };
 
       const av1 = new Date(new Date().setDate(new Date().getDate() + 1));
       const av2 = new Date(new Date().setDate(new Date().getDate() + 2));

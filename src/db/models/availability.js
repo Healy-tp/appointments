@@ -100,6 +100,25 @@ class Availability extends Model {
       return 0;
     }), offices];
   }
+
+  static async getAvailableExtraAppointments(doctorId) {
+    const availabilities = await this.findAll({
+      where: {
+        doctorId,
+      },
+    });
+
+    const extraApptsByDay = {};
+    availabilities.forEach((av) => {
+      const startDt = this.getClosestDateToWeekday(av.weekday);
+      const validUntilDt = new Date(av.validUntil);
+      while (startDt < validUntilDt) {
+        extraApptsByDay[new Date(startDt.toJSON().slice(0, 10)).getTime()] = av.extraAppts;
+        startDt.setDate(startDt.getDate() + 7);
+      }
+    });
+    return extraApptsByDay;
+  }
 }
 
 Availability.init({
