@@ -4,7 +4,7 @@ const { sendMessage } = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
 
 async function checkAppointmentsForReminders() {
-  if (config.ACTIVE_ENV !== 'development') {
+  if (config.NODE_ENV !== 'development') {
     const appointments24Hs = await apptController.getAppointmentsInInterval(5);
     sendMessage(queueConstants.REMINDER_24_HS_EVENT, appointments24Hs);
     // const appointments48Hs = await apptController.getAppointmentsInInterval(2);
