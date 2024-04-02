@@ -8,8 +8,9 @@ let connection;
 
 async function establishConnectionWithRabbitMQ() {
   try {
-    const amqpServer = `amqp://${config.RMQ_HOST}:5672`;
-    connection = await amqplib.connect(amqpServer);
+    const amqpServer = `${config.RMQ_PROTOCOL}://${config.RMQ_HOST}:${config.RMQ_PORT}`;
+    const opt = { credentials: amqplib.credentials.plain(config.RMQ_USER, config.RMQ_PASSWORD) };
+    connection = await amqplib.connect(amqpServer, opt);
     logger.info('Successfully connected to Rabbit MQ.');
     const channel = await connection.createChannel();
     await channel.assertExchange(
