@@ -65,6 +65,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
       },
     });
+    console.log('Successfully ran create appointments migrations');
   },
   async down(queryInterface) {
     await queryInterface.dropTable('appointments');

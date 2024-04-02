@@ -27,6 +27,7 @@ module.exports = {
       //   unique: true,
       // },
     });
+    console.log('Successfully ran create doctors migrations');
   },
   async down(queryInterface) {
     await queryInterface.dropTable('doctors');

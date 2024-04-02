@@ -68,6 +68,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
     });
+    console.log('Successfully ran create availabilities migrations');
   },
   async down(queryInterface) {
     await queryInterface.dropTable('availabilities');

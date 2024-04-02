@@ -24,6 +24,7 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+    console.log('Successfully ran create offices migrations');
   },
   async down(queryInterface) {
     await queryInterface.dropTable('offices');
