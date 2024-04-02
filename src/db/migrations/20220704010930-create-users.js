@@ -26,6 +26,7 @@ module.exports = {
       //   // primaryKey: true,
       // },
     });
+    console.log('Successfully ran create users migrations');
   },
   async down(queryInterface) {
     await queryInterface.dropTable('users');
