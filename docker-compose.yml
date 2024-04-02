@@ -1,9 +1,16 @@
 version: "3"
 services:
   server:
-    image: "hernantain/healy-appointments"
+    build:
+      context: .
+      dockerfile: Dockerfile
     mem_limit: 128m
     hostname: appointments
+    volumes:
+      - /app/node_modules
+      - .:/app
+    ports:
+      - '80:80'
     environment:
       - PORT=$PORT,
       - POSTGRES_USER=$POSTGRES_USER
