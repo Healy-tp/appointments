@@ -1,5 +1,6 @@
 const express = require('express');
 const cron = require('node-cron');
+const cors = require('cors');
 
 const { errorHandler } = require('@healy-tp/common');
 const bodyParser = require('body-parser');
@@ -14,6 +15,7 @@ cron.schedule('* * * * *', () => {
 });
 
 const app = express();
+app.use(cors());
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
