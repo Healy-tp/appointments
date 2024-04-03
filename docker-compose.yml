@@ -11,6 +11,8 @@ services:
       - .:/app
     ports:
       - '80:80'
+
+    command: sh -c "npm run migrate && npm start"
     environment:
       - PORT=$PORT,
       - POSTGRES_USER=$POSTGRES_USER
