@@ -14,7 +14,8 @@ services:
 
     command: sh -c "npm run migrate && npm start"
     environment:
-      - PORT=$PORT,
+      - PORT=$PORT
+      - NODE_ENV=$NODE_ENV
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
       - POSTGRES_DB=$POSTGRES_DB
