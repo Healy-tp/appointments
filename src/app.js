@@ -15,7 +15,7 @@ cron.schedule('* * * * *', () => {
 });
 
 const app = express();
-app.use(cors());
+app.use(cors({ credentials: true }));
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
