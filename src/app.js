@@ -15,7 +15,13 @@ cron.schedule('* * * * *', () => {
 });
 
 const app = express();
-app.use(cors({ origin: 'healy-gateway.us-east-1.elasticbeanstalk.com', credentials: true }));
+app.use(cors({
+  origin: [
+    'healy-gateway.us-east-1.elasticbeanstalk.com',
+    'healy-frontend.us-east-1.elasticbeanstalk.com',
+  ],
+  credentials: true,
+}));
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
