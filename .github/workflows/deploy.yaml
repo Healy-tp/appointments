@@ -2,7 +2,7 @@ name: Deploy Appointments service
 on:
   push:
     branches:
-      - main
+      - feature/run-migrations
 
 jobs:
   build:

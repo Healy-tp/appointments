@@ -19,6 +19,7 @@ async function sendMessageToExchange(event, payload) {
       event,
       Buffer.from(JSON.stringify({ event, payload })),
     );
+    channel.close();
   } catch (error) {
     logger.error('Error while sending message to Rabbit MQ');
     logger.error(error);

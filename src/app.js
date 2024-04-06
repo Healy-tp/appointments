@@ -10,7 +10,7 @@ const cookieSession = require('cookie-session');
 const routes = require('./routes/api');
 const { checkAppointmentsForReminders } = require('./reminders');
 
-cron.schedule('* * * * *', () => {
+cron.schedule('0 6 * * *', () => {
   checkAppointmentsForReminders();
 });
 
