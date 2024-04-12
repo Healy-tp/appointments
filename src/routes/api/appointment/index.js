@@ -162,8 +162,8 @@ async function getHistory(req, res, next) {
     const requestorId = req.currentUser.id;
     const counterpartId = _.get(req, 'params.id');
     const params = {
-      doctorId: req.currentUser.roleId === 2 ? requestorId : counterpartId,
-      userId: req.currentUser.roleId === 2 ? counterpartId : requestorId,
+      doctorId: req.currentUser.roleId === 'acc7eb5a-d559-449c-8955-ac0e39016e4c' ? requestorId : counterpartId,
+      userId: req.currentUser.roleId === 'acc7eb5a-d559-449c-8955-ac0e39016e4c' ? counterpartId : requestorId,
     };
     const response = await apptController.getHistoryBetween(params);
     res.status(200).send(response);
