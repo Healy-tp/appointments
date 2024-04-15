@@ -13,7 +13,7 @@ There are a few things that you need in order to setup the project:
 
 After we've got the above installed, you should follow a few steps:
 
-Clone this repository 
+Clone this repository
 
 ```
 git clone https://github.com/Healy-tp/appointments.git
@@ -44,6 +44,7 @@ npm run docker:up
 ```
 
 Run the migrations
+
 ```
 npm run migrate
 ```
