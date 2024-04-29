@@ -6,16 +6,16 @@ const apptController = require('../../../controllers/appointment');
 const availabilityController = require('../../../controllers/availability');
 const officeController = require('../../../controllers/office');
 
-router.get('/availabilities', [currentUser, isAdmin], getAllAvailabilities);
-router.get('/offices', [currentUser, isAdmin], getAllOffices);
-router.get('/appointments', [currentUser, isAdmin], getAllAppointments);
+router.get('/availabilities', [currentUser], getAllAvailabilities);
+router.get('/offices', [currentUser], getAllOffices);
+router.get('/appointments', [currentUser], getAllAppointments);
 
-router.post('/appointments/create-for-user', [currentUser, isAdmin], createAppointmentForUser);
-router.post('/offices/create', [currentUser, isAdmin], createOffice);
+router.post('/appointments/create-for-user', [currentUser], createAppointmentForUser);
+router.post('/offices/create', [currentUser], createOffice);
 
-router.put('/offices/edit', [currentUser, isAdmin], editOffice);
-router.put('/availabilities/edit', [currentUser, isAdmin], editAvailability);
-router.put('/appointment/edit', [currentUser, isAdmin], editAppointment);
+router.put('/offices/edit', [currentUser], editOffice);
+router.put('/availabilities/edit', [currentUser], editAvailability);
+router.put('/appointment/edit', [currentUser], editAppointment);
 
 module.exports = router;
 

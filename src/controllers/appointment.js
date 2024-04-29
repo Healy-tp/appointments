@@ -141,6 +141,10 @@ async function userUpdateAppointment(id, updates, userId) {
   const existingAppt = await Appointment.findOne(filters);
   if (existingAppt.userId !== userId) return false;
 
+  if (moment().add(1, 'days').isBefore(existingAppt.arrivalTime)) {
+    throw new Error('Cannot update appointment within  72 hrs of arrival time');
+  }
+
   return existingAppt.update({
     ...updates,
     timesModifiedByUser: existingAppt.timesModifiedByUser + 1,
@@ -200,7 +204,7 @@ async function startChat(apptId) {
 
   const appt = await Appointment.findOne({ where: { id: apptId } });
   if (!appt.canStartChat()) {
-    throw new Error('You can only start a chat within 7 days of your appointment of 15 days past it.');
+    throw new Error('You can only start a chat within 7 days of your appointment or 15 days past it.');
   }
 
   rmq.sendMessage(queueConstants.CHAT_STARTED_EVENT, {
@@ -401,7 +405,7 @@ async function exportPDF(doctorId, userId) {
     where: { doctorId, userId },
     include: [{ model: Doctor }, { model: User }],
   });
-  
+
   const fileName = await pdfGenerator.generatePDF(appts);
   return fileName;
 }
