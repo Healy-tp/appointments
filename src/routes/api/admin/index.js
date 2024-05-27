@@ -1,10 +1,12 @@
 const router = require('express').Router();
+const _ = require('lodash');
 
 const { currentUser, isAdmin } = require('@healy-tp/common');
 const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
 const availabilityController = require('../../../controllers/availability');
 const officeController = require('../../../controllers/office');
+const { Doctor } = require('../../../db/models/doctor');
 
 router.get('/availabilities', [currentUser], getAllAvailabilities);
 router.get('/offices', [currentUser], getAllOffices);
@@ -16,6 +18,8 @@ router.post('/offices/create', [currentUser], createOffice);
 router.put('/offices/edit', [currentUser], editOffice);
 router.put('/availabilities/edit', [currentUser], editAvailability);
 router.put('/appointment/edit', [currentUser], editAppointment);
+
+router.delete('/doctors/delete/:id', [currentUser], deleteDoctor);
 
 module.exports = router;
 
@@ -93,6 +97,20 @@ async function editAppointment(req, res, next) {
   try {
     const response = await apptController.editAppointment(req.body);
     res.status(200).send(response);
+  } catch (err) {
+    logger.error(err.message);
+    next(err);
+  }
+}
+
+async function deleteDoctor(req, res, next) {
+  const doctorId = _.get(req, 'params.id');
+  try {
+    Doctor.destroy({
+      where: {
+        id: doctorId,
+      },
+    });
   } catch (err) {
     logger.error(err.message);
     next(err);

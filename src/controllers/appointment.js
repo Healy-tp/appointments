@@ -110,7 +110,7 @@ async function createAppointment({
       throw new Error('No slots available for the selected doctor at that time');
     }
   } else {
-    extraApptDt = extraAppt ? arrivalTime : null;
+    extraApptDt = extraAppt ? arrivalTime.split(' ')[0] : null;
     arrivalTime = null;
   }
 
@@ -306,7 +306,6 @@ async function doctorDayCancelation(doctorId, dateString) {
     });
   }
 
-
   const updateMsgs = [];
   canceledAppts.forEach((a, idx) => {
     Appointment.create({
@@ -402,7 +401,7 @@ async function markAssisted(apptId) {
 
 async function exportPDF(doctorId, userId) {
   const appts = await Appointment.findAll({
-    where: { doctorId, userId },
+    where: { doctorId, userId, status: 'confirmed' },
     include: [{ model: Doctor }, { model: User }],
   });
 
