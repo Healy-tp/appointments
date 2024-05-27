@@ -18,6 +18,7 @@ module.exports = {
           },
           key: 'id',
         },
+        onDelete: 'CASCADE',
         allowNull: false,
       },
       officeId: {
