@@ -141,7 +141,7 @@ async function userUpdateAppointment(id, updates, userId) {
   const existingAppt = await Appointment.findOne(filters);
   if (existingAppt.userId !== userId) return false;
 
-  if (moment().add(1, 'days').isBefore(existingAppt.arrivalTime)) {
+  if (moment().add(3, 'days').isAfter(existingAppt.arrivalTime)) {
     throw new Error('Cannot update appointment within  72 hrs of arrival time');
   }
 

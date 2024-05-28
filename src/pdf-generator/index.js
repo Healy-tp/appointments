@@ -1,6 +1,7 @@
 const { PDFDocument, rgb } = require('pdf-lib');
 const fs = require('fs');
-const logger = require('../logger');
+const moment = require('moment');
+require('moment/locale/es');
 
 const PAGE_WIDTH = 595;
 const PAGE_HEIGHT = 842;
@@ -79,7 +80,7 @@ async function generatePDF(appts) {
 
   let currentPage = mainPage;
   let yPosition = currentPage.getHeight() - 90;
-  let appt, newLines, lineLength;
+  let appt, newLines, lineLength, date;
   for (let i = 0; i < appts.length; i++) {
     appt = appts[i];
     if (yPosition - TITLE_SIZE < 50) {
@@ -87,9 +88,12 @@ async function generatePDF(appts) {
       yPosition = currentPage.getHeight() - 50;
     }
 
+    date = appt.extraAppt ? `${moment(appt.extraAppt).format('ll')} Sobreturno` : moment(appt.arrivalTime).utc().format('LLLL')
+
     // Title
-    addText(currentPage, font, appts[i].arrivalTime.toJSON(), yPosition, TITLE_SIZE);
+    addText(currentPage, font, date, yPosition, TITLE_SIZE);
     yPosition -= TITLE_SIZE;
+
     // Body
     addText(currentPage, font, appts[i].notes, yPosition, BODY_SIZE);
 
