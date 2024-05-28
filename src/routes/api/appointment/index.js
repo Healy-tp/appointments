@@ -7,7 +7,6 @@ const logger = require('../../../logger');
 const apptController = require('../../../controllers/appointment');
 
 /* ****** route definitions ****** */
-// TODO: Improve error handling
 
 router.get('/all', getAllAppointments);
 router.get('/', currentUser, getAppointmentsByUserId);
@@ -25,7 +24,6 @@ router.post('/:id/upsert-notes', currentUser, upsertNotes);
 router.post('/:id/doctor-cancelation', currentUser, doctorAppointmentCancellation);
 router.post('/:id/confirm-appt', userConfirmAppointment);
 router.post('/doctor-day-cancelation', currentUser, doctorDayCancelation);
-
 
 module.exports = router;
 
