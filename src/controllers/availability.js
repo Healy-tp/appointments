@@ -108,6 +108,9 @@ async function getAllRecords() {
     include: [{
       model: Doctor,
       attributes: ['id', 'firstName', 'lastName', 'specialty'],
+    },
+    {
+      model: Office
     }],
   });
   return response;

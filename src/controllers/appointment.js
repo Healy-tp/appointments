@@ -191,7 +191,7 @@ async function getAllAppointments(isAdmin = false) {
   const params = !isAdmin ? {
     attributes: ['doctorId', 'arrivalTime'],
   } : {
-    include: [{ model: Doctor }, { model: User }],
+    include: [{ model: Doctor }, { model: User }, {model: Office}],
   };
   const response = await Appointment.findAll(params);
   return response;
