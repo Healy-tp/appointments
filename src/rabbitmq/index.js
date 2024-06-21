@@ -14,25 +14,29 @@ async function establishConnectionWithRabbitMQ() {
     logger.info('Successfully connected to Rabbit MQ.');
     const channel = await connection.createChannel();
     await channel.assertExchange(
-      c.USERS_APPOINTMENTS_EXCHANGE,
+      c.HEALY_EXCHANGE,
       c.DIRECT_EXCHANGE_TYPE,
       {
-        durable: false,
+        durable: true,
       },
     );
 
-    const r = channel.assertQueue('', {
-      exclusive: true,
+    const r = channel.assertQueue(c.APPTS_QUEUE, {
+      exclusive: false,
+      autoDelete: false,
+      durable: true,
     });
 
-    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.USER_CREATED_EVENT);
-    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.USER_UPDATED_EVENT);
-    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.DOCTOR_CREATED_EVENT);
-    channel.bindQueue(r.queue, c.USERS_APPOINTMENTS_EXCHANGE, c.DOCTOR_CONFIRMED_EVENT);
+    channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.USER_CREATED_EVENT);
+    channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.USER_UPDATED_EVENT);
+    channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.DOCTOR_CREATED_EVENT);
+    channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.DOCTOR_CONFIRMED_EVENT);
 
     await channel.consume(r.queue, (data) => {
       handleData(data);
       channel.ack(data);
+    },{
+      noAck: false
     });
   } catch (error) {
     logger.error(error);

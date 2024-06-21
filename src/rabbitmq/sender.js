@@ -7,15 +7,15 @@ async function sendMessageToExchange(event, payload) {
     const connection = getRabbitMQConnection();
     const channel = await connection.createChannel();
     await channel.assertExchange(
-      c.USERS_APPOINTMENTS_EXCHANGE,
+      c.HEALY_EXCHANGE,
       c.DIRECT_EXCHANGE_TYPE,
       {
-        durable: false,
+        durable: true,
       },
     );
 
     channel.publish(
-      c.USERS_APPOINTMENTS_EXCHANGE,
+      c.HEALY_EXCHANGE,
       event,
       Buffer.from(JSON.stringify({ event, payload })),
     );

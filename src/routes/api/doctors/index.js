@@ -5,8 +5,6 @@ const logger = require('../../../logger');
 
 router.get('/', getDoctors);
 
-// router.use(cors({ origin: '*', credentials: true }));
-
 module.exports = router;
 
 async function getDoctors(req, res, next) {

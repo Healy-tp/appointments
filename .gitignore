@@ -7,3 +7,4 @@ package-lock.json
 volumes
 .DS_Store
 
+.scannerwork/
