@@ -9,15 +9,13 @@ const { expect } = chai;
 
 const outputMockData = require('../mockData/appointment');
 
-// const {
-//   DOCTOR_IDS, DOCTOR_ID, AVAILABILITY_ID, VALID_UNTIL_DATE, OFFICE_ID,
-// } = require('./constants');
-// const { FREQUENCIES, WEEKDAYS } = require('../../utils/constants');
+
 const { Appointment } = require('../../db/models/appointment');
 const { Availability } = require('../../db/models/availability');
 const { APPOINTMENT_STATUS } = require('../../utils/constants');
 
 const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+const oneWeekFromNow = new Date(new Date().setDate(new Date().getDate() + 7));
 
 describe('controllers/appointment', () => {
   let modelStub;
@@ -211,6 +209,7 @@ describe('controllers/appointment', () => {
       const updates = { arrivalTime: tomorrow.toJSON(), officeId: 1 };
       const fakeApptObj = {
         userId: 1,
+        arrivalTime: oneWeekFromNow,
         update: sinon.stub().returns(null),
       };
       const findOneStub = sinon.stub(Appointment, 'findOne').returns(fakeApptObj);

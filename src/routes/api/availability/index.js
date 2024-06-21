@@ -49,7 +49,6 @@ async function createAvailability(req, res, next) {
 
 async function getAvailabilityByDoctorId(req, res, next) {
   try {
-    // const doctorId = _.get(req, 'params.doctorId');
     const doctorId = req.currentUser.id;
     const response = await availabilityController.getByDoctorId(doctorId);
     res.status(200).send(response);
