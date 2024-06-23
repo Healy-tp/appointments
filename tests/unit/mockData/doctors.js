@@ -1,5 +1,5 @@
 const { SPECIALTIES } = require('@healy-tp/common');
-const { DOCTOR_ID } = require('../test/constants');
+const { DOCTOR_ID } = require('../constants');
 
 const fakeDoctor = {
   id: DOCTOR_ID,

@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const cookieSession = require('cookie-session');
 
 const routes = require('./routes/api');
-const { checkAppointmentsForReminders } = require('./reminders');
+const { checkAppointmentsForReminders } = require('./services/reminders');
 
 cron.schedule('0 6 * * *', () => {
   checkAppointmentsForReminders();

@@ -7,13 +7,13 @@ const moment = require('moment');
 
 const { expect } = chai;
 
-const { Availability } = require('../../db/models/availability');
-const outputMockData = require('../mockData/availability');
+const { Availability } = require('../../src/db/models/availability');
+const outputMockData = require('./mockData/availability');
 
 const {
   DOCTOR_IDS, DOCTOR_ID, AVAILABILITY_ID, VALID_UNTIL_DATE, OFFICE_ID,
 } = require('./constants');
-const { FREQUENCIES, WEEKDAYS } = require('../../utils/constants');
+const { FREQUENCIES, WEEKDAYS } = require('../../src/utils/constants');
 
 describe('controllers/availability', () => {
   let modelStub;
@@ -21,7 +21,7 @@ describe('controllers/availability', () => {
 
   before(() => {
     // import file to test
-    availabilityController = require('../availability');
+    availabilityController = require('../../src/controllers/availability');
   });
 
   afterEach(() => {

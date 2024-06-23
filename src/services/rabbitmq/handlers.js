@@ -1,7 +1,7 @@
 const rabbitMQConstants = require('./constants');
-const logger = require('../logger');
-const { User } = require('../db/models/user');
-const { Doctor } = require('../db/models/doctor');
+const logger = require('../../utils/logger');
+const { User } = require('../../db/models/user');
+const { Doctor } = require('../../db/models/doctor');
 
 async function processUserCreatedEvent(content) {
   const { firstName, lastName, id } = content.payload;

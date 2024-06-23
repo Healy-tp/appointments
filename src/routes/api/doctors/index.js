@@ -1,7 +1,7 @@
 const router = require('express').Router();
 // const cors = require('cors');
 const doctorsController = require('../../../controllers/doctors');
-const logger = require('../../../logger');
+const logger = require('../../../utils/logger');
 
 router.get('/', getDoctors);
 

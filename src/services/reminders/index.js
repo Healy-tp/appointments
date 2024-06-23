@@ -1,5 +1,5 @@
-const config = require('../config');
-const apptController = require('../controllers/appointment');
+const config = require('../../config');
+const apptController = require('../../controllers/appointment');
 const { sendMessage } = require('../rabbitmq/sender');
 const queueConstants = require('../rabbitmq/constants');
 

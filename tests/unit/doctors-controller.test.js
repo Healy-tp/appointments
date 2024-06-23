@@ -6,8 +6,8 @@ const chai = require('chai');
 
 const { expect } = chai;
 
-const { Doctor } = require('../../db/models/doctor');
-const outputMockData = require('../mockData/doctors');
+const { Doctor } = require('../../src/db/models/doctor');
+const outputMockData = require('./mockData/doctors');
 
 describe('controllers/doctors', () => {
   let modelStub;
@@ -15,7 +15,7 @@ describe('controllers/doctors', () => {
 
   before(() => {
     // import file to test
-    doctorController = require('../doctors');
+    doctorController = require('../../src/controllers/doctors');
   });
 
   afterEach(() => {

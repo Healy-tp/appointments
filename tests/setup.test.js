@@ -1,7 +1,6 @@
 const sinon = require('sinon');
 
-const rabbitmq = require('../rabbitmq/sender');
-// const logger = require('../logger');
+const rabbitmq = require('../src/services/rabbitmq/sender');
 
 before(() => {
   // sinon.stub(logger, 'info').returns(null);

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { currentUser } = require('@healy-tp/common');
-const logger = require('../../../logger');
+const logger = require('../../../utils/logger');
 const officeController = require('../../../controllers/office');
 
 router.get('/', currentUser, getAllOffices);
