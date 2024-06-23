@@ -3,7 +3,7 @@ const router = require('express').Router();
 const _ = require('lodash');
 const { currentUser } = require('@healy-tp/common');
 
-const logger = require('../../../logger');
+const logger = require('../../../utils/logger');
 const apptController = require('../../../controllers/appointment');
 
 /* ****** route definitions ****** */

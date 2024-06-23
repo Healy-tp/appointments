@@ -1,4 +1,4 @@
-const logger = require('../logger');
+const logger = require('../../utils/logger');
 const { getRabbitMQConnection } = require('./index');
 const c = require('./constants');
 

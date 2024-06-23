@@ -9,9 +9,9 @@ const { Availability } = require('../db/models/availability');
 const { Doctor } = require('../db/models/doctor');
 const { User } = require('../db/models/user');
 const { Office } = require('../db/models/office');
-const pdfGenerator = require('../pdf-generator');
-const rmq = require('../rabbitmq/sender');
-const queueConstants = require('../rabbitmq/constants');
+const pdfGenerator = require('../services/pdf-generator');
+const rmq = require('../services/rabbitmq/sender');
+const queueConstants = require('../services/rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 
 const self = {

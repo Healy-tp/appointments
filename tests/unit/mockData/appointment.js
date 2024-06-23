@@ -1,4 +1,4 @@
-const { APPOINTMENT_STATUS } = require("../../utils/constants");
+const { APPOINTMENT_STATUS } = require("../../../src/utils/constants");
 
 const fakeAppt1 = {
   id: 1,

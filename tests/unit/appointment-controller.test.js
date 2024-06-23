@@ -1,18 +1,16 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable global-require */
-
-
 const sinon = require('sinon');
 const chai = require('chai');
 
 const { expect } = chai;
 
-const outputMockData = require('../mockData/appointment');
+const outputMockData = require('./mockData/appointment');
 
 
-const { Appointment } = require('../../db/models/appointment');
-const { Availability } = require('../../db/models/availability');
-const { APPOINTMENT_STATUS } = require('../../utils/constants');
+const { Appointment } = require('../../src/db/models/appointment');
+const { Availability } = require('../../src/db/models/availability');
+const { APPOINTMENT_STATUS } = require('../../src/utils/constants');
 
 const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
 const oneWeekFromNow = new Date(new Date().setDate(new Date().getDate() + 7));
@@ -23,7 +21,7 @@ describe('controllers/appointment', () => {
 
   before(() => {
     // import file to test
-    apptController = require('../appointment');
+    apptController = require('../../src/controllers/appointment');
   });
 
   afterEach(() => {

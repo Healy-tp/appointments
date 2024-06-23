@@ -1,5 +1,5 @@
 const { SPECIALTIES } = require('@healy-tp/common');
-const { OFFICE_ID, OFFICE_NUMBER } = require('../test/constants');
+const { OFFICE_ID, OFFICE_NUMBER } = require('../constants');
 
 const fakeOffice = {
   id: OFFICE_ID,
@@ -13,6 +13,5 @@ function getAllOffices() {
 
 module.exports = {
   getAllOffices,
-
   fakeOffice,
 };

@@ -1,7 +1,7 @@
 const app = require('./app');
 const config = require('./config');
-const logger = require('./logger');
-const { establishConnectionWithRabbitMQ } = require('./rabbitmq');
+const logger = require('./utils/logger');
+const { establishConnectionWithRabbitMQ } = require('./services/rabbitmq');
 
 const { sequelize } = require('./db/dbsetup');
 const models = require('./db/models');

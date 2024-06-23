@@ -1,5 +1,5 @@
-const { DOCTOR_ID, OFFICE_ID, AVAILABILITY_ID } = require('../test/constants');
-const { FREQUENCIES, WEEKDAYS } = require('../../utils/constants');
+const { DOCTOR_ID, OFFICE_ID, AVAILABILITY_ID } = require('../constants');
+const { FREQUENCIES, WEEKDAYS } = require('../../../src/utils/constants');
 
 const fakeAvailability = {
   id: AVAILABILITY_ID,

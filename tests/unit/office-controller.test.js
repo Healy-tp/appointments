@@ -8,8 +8,8 @@ const { expect } = chai;
 
 const { SPECIALTIES } = require('@healy-tp/common');
 
-const { Office } = require('../../db/models/office');
-const outputMockData = require('../mockData/office');
+const { Office } = require('../../src/db/models/office');
+const outputMockData = require('./mockData/office');
 
 const { OFFICE_NUMBER, OFFICE_ID } = require('./constants');
 
@@ -19,7 +19,7 @@ describe('controllers/availability', () => {
 
   before(() => {
     // import file to test
-    officeController = require('../office');
+    officeController = require('../../src/controllers/office');
   });
 
   afterEach(() => {

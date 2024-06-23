@@ -1,6 +1,6 @@
 const amqplib = require('amqplib');
-const config = require('../config');
-const logger = require('../logger');
+const config = require('../../config');
+const logger = require('../../utils/logger');
 const c = require('./constants');
 const { handleData } = require('./handlers');
 
@@ -33,8 +33,12 @@ async function establishConnectionWithRabbitMQ() {
     channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.DOCTOR_CONFIRMED_EVENT);
 
     await channel.consume(r.queue, (data) => {
-      handleData(data);
-      channel.ack(data);
+      try{
+        handleData(data);
+        channel.ack(data);
+      } catch (err) {
+        logger.error("Error processing RabbitMQ Event", err);
+      }
     },{
       noAck: false
     });
