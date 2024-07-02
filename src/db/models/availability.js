@@ -17,7 +17,7 @@ class Availability extends Model {
     });
   }
 
-  static async getAllSlots(dt, oid) {
+  static async getAllSlots(dt, oid, transaction) {
     const dates = [];
     const dateString = dt.toJSON().slice(0, 10);
     const av = await this.findOne({
@@ -25,6 +25,7 @@ class Availability extends Model {
         weekday: dt.getDay(),
         officeId: oid,
       },
+      transaction,
     });
 
     if (!av || dt > new Date(av.validUntil)) {
@@ -63,11 +64,12 @@ class Availability extends Model {
     return slots;
   }
 
-  static async getAllAvailableSlotsForDoctor(doctorId) {
+  static async getAllAvailableSlotsForDoctor(doctorId, transaction) {
     const availabilities = await this.findAll({
       where: {
         doctorId,
       },
+      transaction
     });
 
     const offices = {};
@@ -101,11 +103,12 @@ class Availability extends Model {
     }), offices];
   }
 
-  static async getAvailableExtraAppointments(doctorId) {
+  static async getAvailableExtraAppointments(doctorId, transaction) {
     const availabilities = await this.findAll({
       where: {
         doctorId,
       },
+      transaction
     });
 
     const extraApptsByDay = {};

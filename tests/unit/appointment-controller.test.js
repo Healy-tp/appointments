@@ -2,6 +2,7 @@
 /* eslint-disable global-require */
 const sinon = require('sinon');
 const chai = require('chai');
+const moment = require('moment');
 
 const { expect } = chai;
 
@@ -12,8 +13,9 @@ const { Appointment } = require('../../src/db/models/appointment');
 const { Availability } = require('../../src/db/models/availability');
 const { APPOINTMENT_STATUS } = require('../../src/utils/constants');
 
-const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
-const oneWeekFromNow = new Date(new Date().setDate(new Date().getDate() + 7));
+const tomorrow = moment().add(1, 'days');
+const oneWeekFromNow = moment().add(7, 'days');;
+const yesterday = moment().subtract(1, 'days');
 
 describe('controllers/appointment', () => {
   let modelStub;
@@ -41,8 +43,7 @@ describe('controllers/appointment', () => {
   });
 
   describe('createAppointment', () => {
-    it('should throw an error if the arrival time is in the past', async () => {
-      const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toJSON();
+    it('should throw an error if the arrival time is in the past', async () => {      
       await apptController.createAppointment({
         arrivalTime: yesterday,
         doctorId: 1,
@@ -127,7 +128,7 @@ describe('controllers/appointment', () => {
       };
       const createStub = sinon.stub(Appointment, 'create').returns(apptDetails);
 
-      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.getTime()]);
+      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.valueOf()]);
       const response = await apptController.createAppointment(apptDetails, false);
 
       expect(getAllSlotsStub.calledOnce).to.be.true;
@@ -138,8 +139,6 @@ describe('controllers/appointment', () => {
     });
 
     it('should create an extra appointment successfully', async () => {
-      const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
-
       const apptDetails = {
         arrivalTime: tomorrow.toJSON(),
         doctorId: 1,
@@ -159,10 +158,8 @@ describe('controllers/appointment', () => {
 
   describe('userUpdateAppointment', () => {
     it('should throw an error if trying to update an appt to a past time', async () => {
-      const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toJSON();
       const updates = { arrivalTime: yesterday, officeId: 1 };
       await apptController.userUpdateAppointment(1, updates, 1)
-
         .then(() => {
           expect('this should not have been called').to.be.false;
         })
@@ -186,7 +183,7 @@ describe('controllers/appointment', () => {
     });
 
     it('should return false if appointment trying to be updated does not belong to userId', async () => {
-      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.getTime()]);
+      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.valueOf()]);
 
       const userId = 1;
       const updates = { arrivalTime: tomorrow.toJSON(), officeId: 1 };
@@ -201,7 +198,7 @@ describe('controllers/appointment', () => {
     });
 
     it('should update appointment successfully', async () => {
-      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.getTime()]);
+      const getAllSlotsStub = sinon.stub(Availability, 'getAllSlots').returns([tomorrow.valueOf()]);
 
       const userId = 1;
       const updates = { arrivalTime: tomorrow.toJSON(), officeId: 1 };
@@ -272,6 +269,7 @@ describe('controllers/appointment', () => {
 
   describe('deleteAppointment', () => {
     it('should return false when trying to update appointment that does not belong to user', async () => {
+      console.log("asdasdasd");
       const userId = 1;
       modelStub = sinon.stub(Appointment, 'findOne').returns({ userId: 2});
       const response = await apptController.deleteAppointment(1, userId);
@@ -329,12 +327,12 @@ describe('controllers/appointment', () => {
         update: sinon.stub().returns(null),
       });
 
-      const appt1 = { arrivalTime: new Date(new Date().setDate(new Date().getDate() + 1)) };
-      const appt2 = { arrivalTime: new Date(new Date().setDate(new Date().getDate() + 2)) };
+      const appt1 = { arrivalTime: tomorrow.toDate() };
+      const appt2 = { arrivalTime: tomorrow.add(1, 'days').toDate() };
 
-      const av1 = new Date(new Date().setDate(new Date().getDate() + 1));
-      const av2 = new Date(new Date().setDate(new Date().getDate() + 2));
-      const av3 = new Date(new Date().setDate(new Date().getDate() + 3));
+      const av1 = tomorrow;
+      const av2 = tomorrow.add(1, 'days');
+      const av3 = av2.add(1, 'days');
 
       const newAppt = {
         arrivalTime: av3.toJSON(),
@@ -343,13 +341,15 @@ describe('controllers/appointment', () => {
         status: APPOINTMENT_STATUS.TO_CONFIRM,
       };
 
-      const av3Day = av3.getDay();
+      const av3Day = av3.day();
       const offices = {
         av3Day: 2,
       };
 
       const allApptsDoctorStub = sinon.stub(Appointment, 'getAllAppointmentsForDoctor').returns([appt1, appt2]);
-      const allAvailabilitiesStub = sinon.stub(Availability, 'getAllAvailableSlotsForDoctor').returns([[av1, av2, av3], offices]);
+      const allAvailabilitiesStub = sinon.stub(Availability, 'getAllAvailableSlotsForDoctor').returns(
+        [[av1.toDate(), av2.toDate(), av3.toDate()], offices]
+      );
       const createStub = sinon.stub(Appointment, 'create').returns(newAppt);
 
       const response = await apptController.doctorAppointmentCancellation(1);

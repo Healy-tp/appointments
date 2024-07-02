@@ -1,5 +1,7 @@
 'use strict';
 
+const moment = require('moment');
+
 module.exports = {
   async up (queryInterface, Sequelize) {
     /**
@@ -19,9 +21,9 @@ module.exports = {
       startHour: '13:00',
       endHour: '16:00',
       frequency: 60,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     },
     {
@@ -32,9 +34,9 @@ module.exports = {
       startHour: '13:00',
       endHour: '16:00',
       frequency: 15,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     },
     {
@@ -45,9 +47,9 @@ module.exports = {
       startHour: '13:00',
       endHour: '16:00',
       frequency: 30,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     },
     {
@@ -58,9 +60,9 @@ module.exports = {
       startHour: '10:00',
       endHour: '16:00',
       frequency: 30,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     },
     {
@@ -71,9 +73,9 @@ module.exports = {
       startHour: '10:00',
       endHour: '16:00',
       frequency: 15,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     },
     {
@@ -84,9 +86,9 @@ module.exports = {
       startHour: '10:00',
       endHour: '16:00',
       frequency: 15,
-      validUntil: new Date(2024, 11, 1),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      validUntil: moment().add(3, 'months').toDate(),
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
       extraAppts: 5,
     }], {});
   },
