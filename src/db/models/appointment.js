@@ -25,22 +25,22 @@ class Appointment extends Model {
 
   canStartChat() {
     const date = this.arrivalTime || this.extraAppt;
-    const now = new Date();
+    // const now = new Date();
     return (
-      moment(now).isSameOrBefore(date)
+      moment().isSameOrBefore(date)
         ? moment(now).isSameOrAfter(moment(date).subtract(7, 'days'))
         : moment(now).isSameOrBefore(moment(date).add(15, 'days'))
     );
   }
 
-  static async rescheduleAppointment(doctorId) {
+  static async rescheduleAppointment(doctorId, transaction) {
     const unavailableSlots = {};
-    const appointments = await this.getAllAppointmentsForDoctor(doctorId);
+    const appointments = await this.getAllAppointmentsForDoctor(doctorId, transaction);
     appointments.forEach((ap) => {
       unavailableSlots[ap.arrivalTime.getTime()] = true;
     });
 
-    const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(doctorId);
+    const [availabilities, offices] = await Availability.getAllAvailableSlotsForDoctor(doctorId, transaction);
     let newDate;
     availabilities.every((a) => {
       if (!unavailableSlots[a.getTime()]) {
@@ -52,9 +52,9 @@ class Appointment extends Model {
     return [newDate, offices];
   }
 
-  static async rescheduleAppointmentUsingExtraSlots(doctorId) {
-    const extraApptsAvailable = await Availability.getAvailableExtraAppointments(doctorId);
-    const extraAppts = await this.getAllExtraAppointmentsForDoctor(doctorId);
+  static async rescheduleAppointmentUsingExtraSlots(doctorId, transaction) {
+    const extraApptsAvailable = await Availability.getAvailableExtraAppointments(doctorId, transaction);
+    const extraAppts = await this.getAllExtraAppointmentsForDoctor(doctorId, transaction);
     extraAppts.forEach((a) => {
       const x = new Date(a.dataValues.extraAppt);
       extraApptsAvailable[x.getTime()] = extraApptsAvailable[x.getTime()] - a.dataValues.count;
@@ -73,17 +73,18 @@ class Appointment extends Model {
     return [newDate, isExtra];
   }
 
-  static async getAllAppointmentsForDoctor(doctorId) {
+  static async getAllAppointmentsForDoctor(doctorId, transaction) {
     const appointments = await this.findAll({
       where: {
         doctorId,
         extraAppt: null,
       },
+      transaction
     });
     return appointments;
   }
 
-  static async getAllExtraAppointmentsForDoctor(doctorId) {
+  static async getAllExtraAppointmentsForDoctor(doctorId, transaction) {
     const appointments = await this.findAll({
       attributes: ['extraAppt', [fn('COUNT', 'id'), 'count']],
       where: {
@@ -94,6 +95,7 @@ class Appointment extends Model {
       },
       group: ['extraAppt'],
       order: [['extraAppt', 'ASC']],
+      transaction,
     });
     return appointments;
   }
