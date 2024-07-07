@@ -1,4 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
+const moment = require('moment');
+
 const { WEEKDAYS, FREQUENCIES } = require('../../utils/constants');
 const { sequelize } = require('../dbsetup');
 
@@ -17,27 +19,28 @@ class Availability extends Model {
     });
   }
 
-  static async getAllSlots(dt, oid, transaction) {
+  static async getAllSlots(date, officeId, transaction) {
     const dates = [];
-    const dateString = dt.toJSON().slice(0, 10);
-    const av = await this.findOne({
+    const formattedDate = moment(date).format('YYYY-MM-DD');
+
+    const availability = await this.findOne({
       where: {
-        weekday: dt.getDay(),
-        officeId: oid,
+        weekday: date.getDay(),
+        officeId,
       },
       transaction,
     });
 
-    if (!av || dt > new Date(av.validUntil)) {
+    if (!availability || date > new Date(availability.validUntil)) {
       return dates;
     }
 
-    const startDt = new Date(`${dateString} ${av.startHour.slice(0, 5)}`);
-    const endDt = new Date(`${dateString} ${av.endHour.slice(0, 5)}`);
+    const startDt = new Date(`${formattedDate} ${availability.startHour.slice(0, 5)}`);
+    const endDt = new Date(`${formattedDate} ${availability.endHour.slice(0, 5)}`);
 
     while (startDt < endDt) {
       dates.push(new Date(startDt).getTime());
-      startDt.setMinutes(startDt.getMinutes() + av.frequency);
+      startDt.setMinutes(startDt.getMinutes() + availability.frequency);
     }
 
     return dates;
@@ -69,7 +72,7 @@ class Availability extends Model {
       where: {
         doctorId,
       },
-      transaction
+      transaction,
     });
 
     const offices = {};
@@ -98,7 +101,7 @@ class Availability extends Model {
 
     return [response.sort((o1, o2) => {
       if (o1 < o2) return -1;
-      else if (o2 > o1) return 1;
+      if (o2 > o1) return 1;
       return 0;
     }), offices];
   }
@@ -108,7 +111,7 @@ class Availability extends Model {
       where: {
         doctorId,
       },
-      transaction
+      transaction,
     });
 
     const extraApptsByDay = {};

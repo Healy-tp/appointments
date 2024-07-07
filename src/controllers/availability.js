@@ -9,7 +9,6 @@ const { Doctor } = require('../db/models/doctor');
 const { Office } = require('../db/models/office');
 const { sequelize } = require('../db/dbsetup');
 
-
 const self = {
   createAvailability,
   getByDoctorId,
@@ -17,9 +16,7 @@ const self = {
   editAvailability,
 };
 
-
 module.exports = self;
-
 
 async function createAvailability({
   doctorId,
@@ -35,16 +32,16 @@ async function createAvailability({
     if (weekday < WEEKDAYS.MONDAY || weekday > WEEKDAYS.SATURDAY) {
       throw new Error(`Weekday "${weekday}" is invalid`);
     }
-  
+
     if (!_.includes(FREQUENCIES, frequency)) {
       throw new Error(`Frequency "${frequency} mins." is not valid`);
     }
-  
+
     const isExpired = moment(validUntil).isBefore(moment());
     if (isExpired) {
       throw new Error('Selected availability date is already expired');
     }
-  
+
     const availabilitiesInOffice = await Availability.findAll({
       where: {
         officeId,
@@ -64,11 +61,11 @@ async function createAvailability({
       },
       transaction,
     });
-  
+
     if (!_.isEmpty(availabilitiesInOffice)) {
       throw new Error('Office is occupied for that date in the selected hour range');
     }
-  
+
     const existingAvailability = await Availability.findOne({
       where: {
         doctorId,
@@ -77,11 +74,11 @@ async function createAvailability({
       raw: true,
       transaction,
     });
-  
+
     if (!_.isEmpty(existingAvailability)) {
       throw new Error(`Doctor ${doctorId} already has an availability on day ${weekday}`);
     }
-  
+
     const startHourTime = `${startHour}:00`;
     const endHourTime = `${endHour}:00`;
     const newAvailability = Availability.create({
@@ -96,12 +93,10 @@ async function createAvailability({
     }, { transaction });
     await transaction.commit();
     return newAvailability;
-
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
-  
 }
 
 async function getByDoctorId(doctorId) {
@@ -121,7 +116,6 @@ async function getByDoctorId(doctorId) {
     const availabilities = Availability.findAll(filters);
     await transaction.commit();
     return availabilities;
-
   } catch (err) {
     transaction.rollback();
     throw err;
@@ -138,7 +132,7 @@ async function getAllRecords() {
         attributes: ['id', 'firstName', 'lastName', 'specialty'],
       },
       {
-        model: Office
+        model: Office,
       }],
     });
     await transaction.commit();
@@ -183,7 +177,6 @@ async function editAvailability({
     }, filters);
     await transaction.commit();
     return updatedAvailability;
-
   } catch (err) {
     await transaction.rollback();
     throw err;
