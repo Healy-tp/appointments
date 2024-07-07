@@ -25,7 +25,7 @@ class Availability extends Model {
 
     const availability = await this.findOne({
       where: {
-        weekday: date.getDay(), // Remove this +1, this is because of Timezone
+        weekday: date.getDay(),
         officeId,
       },
       transaction,
@@ -48,7 +48,7 @@ class Availability extends Model {
 
   static getClosestDateToWeekday(weekday) {
     const startDate = new Date();
-    while (startDate.getDay() + 1 !== weekday) { // Remove this +1, this is because of Timezone
+    while (startDate.getDay() !== weekday) {
       startDate.setDate(startDate.getDate() + 1);
     }
     return startDate;
@@ -91,7 +91,7 @@ class Availability extends Model {
 
     const allAvailableSlots = [];
     allAvailableSlotsForSpecificWeekday.forEach((ad) => {
-      while (ad < validUntils[ad.getDay() + 1]) { // Remove this +1, this is because of Timezone
+      while (ad < validUntils[ad.getDay()]) {
         allAvailableSlots.push(new Date(ad));
         ad.setDate(ad.getDate() + 7);
       }
