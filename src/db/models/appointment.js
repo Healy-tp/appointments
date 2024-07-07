@@ -25,11 +25,10 @@ class Appointment extends Model {
 
   canStartChat() {
     const date = this.arrivalTime || this.extraAppt;
-    // const now = new Date();
     return (
       moment().isSameOrBefore(date)
-        ? moment(now).isSameOrAfter(moment(date).subtract(7, 'days'))
-        : moment(now).isSameOrBefore(moment(date).add(15, 'days'))
+        ? moment().isSameOrAfter(moment(date).subtract(7, 'days'))
+        : moment().isSameOrBefore(moment(date).add(15, 'days'))
     );
   }
 

@@ -16,7 +16,6 @@ const queueConstants = require('../services/rabbitmq/constants');
 const { APPOINTMENT_STATUS } = require('../utils/constants');
 const { sequelize } = require('../db/dbsetup');
 
-
 const self = {
   createAppointment,
   editAppointment,
@@ -62,7 +61,6 @@ async function getAppointmentsByUserId(userId, isDoctor) {
     await transaction.rollback();
     throw err;
   }
-
 }
 
 async function createAppointment({
@@ -96,33 +94,29 @@ async function createAppointment({
           ],
         },
         raw: true,
-        transaction
+        transaction,
       });
 
       if (existingAppt) {
         throw new Error('Cannot create an appointment at that time!');
       }
 
-      // TODO: Fix this
       const sameDayAppt = await Appointment.findOne({
         where: {
           userId,
           arrivalTime: {
-            [Op.between]: [
-              new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() - 1),
-              new Date(arrivalTimeDt.getTime()).setDate(arrivalTimeDt.getDate() + 1),
-            ],
+            [Op.between]: [moment(arrivalTimeDt).startOf('day').toDate(), moment(arrivalTimeDt).endOf('day').toDate()],
           },
         },
-        transaction
+        transaction,
       });
 
       if (sameDayAppt) {
         throw new Error('You already have an appointment for that day');
       }
 
-      const dates = await Availability.getAllSlots(arrivalTimeDt, officeId);
-      if (!dates.includes(arrivalTimeDt.getTime())) {
+      const availableDates = await Availability.getAllSlots(arrivalTimeDt, officeId, transaction);
+      if (!availableDates.includes(arrivalTimeDt.getTime())) {
         throw new Error('No slots available for the selected doctor at that time');
       }
     } else {
@@ -130,7 +124,7 @@ async function createAppointment({
       arrivalTime = null;
     }
 
-    appt = await Appointment.create({
+    const newAppointment = await Appointment.create({
       id: crypto.randomUUID(),
       arrivalTime,
       doctorId,
@@ -138,9 +132,11 @@ async function createAppointment({
       userId,
       extraAppt: extraApptDt,
       status: APPOINTMENT_STATUS.CONFIRMED,
-    }, {transaction});
+    }, {
+      transaction,
+    });
     await transaction.commit();
-    return appt;
+    return newAppointment;
   } catch (err) {
     await transaction.rollback();
     throw err;
