@@ -81,7 +81,7 @@ async function createAvailability({
 
     const startHourTime = `${startHour}:00`;
     const endHourTime = `${endHour}:00`;
-    const newAvailability = Availability.create({
+    const newAvailability = await Availability.create({
       id: crypto.randomUUID(),
       doctorId,
       officeId,
@@ -113,7 +113,7 @@ async function getByDoctorId(doctorId) {
       include: [{ model: Office }],
       transaction,
     };
-    const availabilities = Availability.findAll(filters);
+    const availabilities = await Availability.findAll(filters);
     await transaction.commit();
     return availabilities;
   } catch (err) {

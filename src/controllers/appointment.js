@@ -158,7 +158,7 @@ async function userUpdateAppointment(id, updates, userId) {
       throw new Error('No slots available for the selected doctor at that time');
     }
 
-    const existingAppt = await Appointment.findOne({...filters});
+    const existingAppt = await Appointment.findOne({ ...filters });
     if (existingAppt.userId !== userId) {
       await transaction.commit();
       return false;
@@ -174,7 +174,6 @@ async function userUpdateAppointment(id, updates, userId) {
     }, filters);
     await transaction.commit();
     return updatedAppt;
-
   } catch (err) {
     await transaction.rollback();
     throw err;
