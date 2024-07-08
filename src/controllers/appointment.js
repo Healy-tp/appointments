@@ -115,7 +115,7 @@ async function createAppointment({
         throw new Error('You already have an appointment for that day');
       }
 
-      const availableDates = await Availability.getAllSlots(arrivalTimeDt, officeId, transaction);
+      const availableDates = await Availability.getAllSlots(arrivalTimeDt, officeId);
       if (!availableDates.includes(arrivalTimeDt.getTime())) {
         throw new Error('No slots available for the selected doctor at that time');
       }
