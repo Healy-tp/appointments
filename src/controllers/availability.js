@@ -118,7 +118,7 @@ async function getByDoctorId(doctorId) {
       include: [{ model: Office }],
       transaction,
     };
-    const availabilities = Availability.findAll(filters);
+    const availabilities = await Availability.findAll(filters);
     await transaction.commit();
     return availabilities;
 
