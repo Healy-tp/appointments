@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const _ = require('lodash');
 
-const { currentUser, isAdmin } = require('@healy-tp/common');
+const { currentUser } = require('@healy-tp/common');
 const logger = require('../../../utils/logger');
 const apptController = require('../../../controllers/appointment');
 const availabilityController = require('../../../controllers/availability');

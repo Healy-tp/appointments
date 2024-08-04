@@ -17,15 +17,13 @@ module.exports = self;
 async function getAllOffices() {
   const transaction = await sequelize.transaction();
   try {
-    const offices = await Office.findAll({transaction});
+    const offices = await Office.findAll({ transaction });
     await transaction.commit();
     return offices;
-
   } catch (err) {
     await transaction.rollback();
     throw err;
   }
-  
 }
 
 async function createOffice({
@@ -54,7 +52,7 @@ async function createOffice({
       throw new Error('Office number already exists. Please try another one.');
     }
 
-    const newOffice = Office.create({
+    const newOffice = await Office.create({
       id: crypto.randomUUID(),
       number: officeNumber,
       specialties,
@@ -102,7 +100,7 @@ async function editOffice({
     }
 
     const filters = { where: { id }, transaction };
-    const updatedOffice = Office.update({
+    const updatedOffice = await Office.update({
       number,
       specialties,
     }, filters);
