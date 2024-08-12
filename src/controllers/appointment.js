@@ -369,7 +369,7 @@ async function doctorDayCancelation(doctorId, dateString) {
       return newProposedAppts.length !== canceledApptsCount;
     });
 
-    if (!newProposedAppts.length !== canceledApptsCount) {
+    if (newProposedAppts.length !== canceledApptsCount) {
       const extraApptsAvailable = await Availability.getAvailableExtraAppointments(doctorId, transaction);
       const extraAppts = await Appointment.getAllExtraAppointmentsForDoctor(doctorId, transaction);
       extraAppts.forEach((a) => {

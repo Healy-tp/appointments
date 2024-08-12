@@ -14,6 +14,7 @@ const BODY_SIZE = 12;
 
 const self = {
   generatePDF,
+  saveFile,
 };
 
 module.exports = self;
@@ -104,6 +105,6 @@ async function generatePDF(appts) {
     yPosition -= (3 + lineLength + newLines) * BODY_SIZE;
   }
   const pdfBytes = await pdfDoc.save();
-  const fileName = saveFile(pdfBytes, appts[0]);
+  const fileName = this.saveFile(pdfBytes, appts[0]);
   return fileName;
 }
