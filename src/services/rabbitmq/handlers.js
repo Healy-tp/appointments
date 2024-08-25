@@ -23,8 +23,12 @@ async function processUserUpdatedEvent(content, transaction) {
 }
 
 async function processDoctorCreatedEvent(content, transaction) {
-  const { firstName, lastName, id, specialty } = content.payload;
-  await Doctor.create({ firstName, lastName, id, status: 'pending', specialty }, transaction);
+  const {
+    firstName, lastName, id, specialty,
+  } = content.payload;
+  await Doctor.create({
+    firstName, lastName, id, status: 'pending', specialty,
+  }, transaction);
   await transaction.commit();
   logger.info('Successfully processed DOCTOR_CREATED event');
 }

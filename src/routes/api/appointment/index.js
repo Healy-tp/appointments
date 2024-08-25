@@ -142,7 +142,6 @@ async function doctorDayCancelation(req, res, next) {
   }
 }
 
-
 // TODO: CHECK IF ADD CURRENT USER MDDWARE
 async function userConfirmAppointment(req, res, next) {
   try {

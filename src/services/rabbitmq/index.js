@@ -33,14 +33,14 @@ async function establishConnectionWithRabbitMQ() {
     channel.bindQueue(c.APPTS_QUEUE, c.HEALY_EXCHANGE, c.DOCTOR_CONFIRMED_EVENT);
 
     await channel.consume(r.queue, (data) => {
-      try{
+      try {
         handleData(data);
         channel.ack(data);
       } catch (err) {
-        logger.error("Error processing RabbitMQ Event", err);
+        logger.error('Error processing RabbitMQ Event', err);
       }
-    },{
-      noAck: false
+    }, {
+      noAck: false,
     });
   } catch (error) {
     logger.error(error);

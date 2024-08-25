@@ -54,7 +54,9 @@ async function getAppointmentsByUserId(userId, isDoctor) {
         model: Office,
       }],
     };
-    const appointments = await Appointment.findAll({...filters, transaction});
+    const appointments = await Appointment.findAll({
+      ...filters, transaction,
+    });
     await transaction.commit();
     return appointments;
   } catch (err) {
