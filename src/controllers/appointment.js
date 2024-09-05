@@ -389,25 +389,6 @@ async function doctorDayCancelation(doctorId, dateString) {
     }
 
     const updateMsgs = [];
-    // console.log("HOLA");
-    // canceledAppts.forEach((a, idx) => {
-    //   console.log("CHAU");
-    //   Appointment.create({
-    //     id: crypto.randomUUID(),
-    //     arrivalTime: newProposedAppts[idx].getUTCHours() !== 0 ? newProposedAppts[idx] : null,
-    //     doctorId: a.doctorId,
-    //     officeId: offices[newProposedAppts[idx].getDay()],
-    //     userId: a.userId,
-    //     extraAppt: newProposedAppts[idx].getUTCHours() === 0 ? newProposedAppts[idx] : null,
-    //     status: APPOINTMENT_STATUS.TO_CONFIRM,
-    //   }, {transaction});
-    //   updateMsgs.push({
-    //     doctorId: a.doctorId,
-    //     userId: a.userId,
-    //     proposedTime: newProposedAppts[idx],
-    //     oldTime: a.arrivalTime,
-    //   });
-    // });
     await Promise.all(canceledAppts.map(async (a, idx) => {
       await Appointment.create({
         id: crypto.randomUUID(),
