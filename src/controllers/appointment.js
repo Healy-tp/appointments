@@ -318,7 +318,7 @@ async function doctorAppointmentCancellation(apptId) {
       doctorId: appt.doctorId,
     });
 
-    const newAppt = Appointment.create({
+    const newAppt = await Appointment.create({
       id: crypto.randomUUID(),
       arrivalTime: !isExtra ? newDate : null,
       doctorId: appt.doctorId,
